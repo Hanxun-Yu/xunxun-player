@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+    <RelativeLayout
+        android:id="@+id/topPart"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:background="@drawable/status_mask_top"
+        android:layout_height="300px">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:padding="50px"
+            android:textSize="60px"
+            android:textColor="@color/ijk_color_blue_50"
+            android:text="Title"
+            android:alpha="0.6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <org.crashxun.player.widget.xunxun.TimeView
+            android:id="@+id/timeView"
+            android:alpha="0.6"
+            android:layout_alignParentRight="true"
+            android:padding="50px"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/status_parent"
+        android:layout_centerInParent="true"
+        android:layout_width="400px"
+        android:layout_height="400px">
+
+        <ImageView
+            android:layout_centerInParent="true"
+            android:id="@+id/status_img1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+        <ImageView
+            android:layout_centerInParent="true"
+            android:id="@+id/status_img2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+
+
+
+
+
+
+    <RelativeLayout
+        android:id="@+id/bottomPart"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:background="@drawable/status_mask_down"
+        android:layout_height="300px">
+
+        <org.crashxun.player.widget.xunxun.MiProgressBar
+            android:id="@+id/miProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="1600px"
+            android:layout_alignParentBottom="true"
+            android:layout_height="40px"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="80px"
+            android:background="@null"
+            android:focusable="false"
+            android:max="1000"
+            android:progress="0"
+            android:progressDrawable="@drawable/progress_storage_horizontal" />
+
+
+
+        <RelativeLayout
+            android:id="@+id/cursorLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/control_time_box" />
+
+
+            <TextView
+                android:id="@+id/cursorText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="15px"
+                android:textSize="30px"
+                android:text="00:00:00"
+                android:textColor="@color/ijk_color_blue_50"
+                />
+        </RelativeLayout>
+
+    </RelativeLayout>
+</RelativeLayout>
