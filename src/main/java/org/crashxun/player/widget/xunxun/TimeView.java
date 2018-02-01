@@ -95,8 +95,9 @@ public class TimeView extends RelativeLayout {
     TimeRunnable timeRunnable;
 
     Animation getMaohaoVisAnim() {
-        Animation maohaoVis = new AlphaAnimation(1f, 0f);
+        Animation maohaoVis = new AlphaAnimation(1f, 0.3f);
         maohaoVis.setDuration(1500);
+        maohaoVis.setFillAfter(true);
         maohaoVis.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -117,7 +118,7 @@ public class TimeView extends RelativeLayout {
     }
 
     Animation getMaohaoInVisAnim() {
-        Animation maohaoInvis = new AlphaAnimation(0f, 1f);
+        Animation maohaoInvis = new AlphaAnimation(0.3f, 1f);
         maohaoInvis.setDuration(1500);
         maohaoInvis.setFillAfter(true);
         maohaoInvis.setAnimationListener(new Animation.AnimationListener() {
@@ -128,7 +129,13 @@ public class TimeView extends RelativeLayout {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                timeViewHold.maohao.startAnimation(getMaohaoVisAnim());
+                postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        timeViewHold.maohao.startAnimation(getMaohaoVisAnim());
+
+                    }
+                },2000);
             }
 
             @Override

@@ -13,18 +13,22 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<item android:id="@android:id/background">
+
+	<item android:id="@android:id/background"
+        >
         <shape>
             <corners android:radius="12dp" />
             <stroke android:color="#66ffffff"
                     android:width="1px"
                     />
-            <!--<gradient-->
-                <!--android:angle="270.0"-->
-                <!--android:centerColor="#bbbbbc"-->
-                <!--android:centerY="0.75"-->
-                <!--android:endColor="#dbdedf"-->
-                <!--android:startColor="#656666" />-->
+            <gradient
+                android:angle="270.0"
+                android:centerColor="#20ffffff"
+                android:endColor="#25ffffff"
+                android:startColor="#25ffffff" />
+
+
+
         </shape>
     </item>
 
@@ -38,8 +42,8 @@
                     />
                 <gradient
                     android:angle="270.0"
-                    android:endColor="#55ffffff"
-                    android:startColor="#55ffffff" />
+                    android:endColor="#56ffffff"
+                    android:startColor="#56ffffff" />
             </shape>
         </clip>
     </item>
@@ -50,11 +54,19 @@
                 <stroke android:color="#00ffffff"
                     android:width="2px"
                     />
+                <!--<gradient-->
+                    <!--android:angle="270.0"-->
+                    <!--android:centerX="0.2"-->
+                    <!--android:startColor="#43a0ff"-->
+                    <!--android:endColor="#102ea9"-->
+                     <!--/>-->
                 <gradient
                     android:angle="270.0"
-                    android:startColor="#43a0ff"
-                    android:endColor="#2a47ec"
-                     />
+                    android:centerX="0.8"
+                    android:centerColor="#102ea9"
+                    android:startColor="#2185ea"
+                    android:endColor="#102ea9"
+                    />
 
             </shape>
 

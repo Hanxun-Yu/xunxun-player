@@ -429,11 +429,16 @@ public class MiPlayController extends FrameLayout implements IPlayController {
 
         String secStr = String.valueOf(sec);
         String minStr = String.valueOf(min);
-        String hourStr = String.valueOf(hour);
+        String hourStr = "";
+        if(hour != 0) {
+             hourStr = String.valueOf(hour);
+            hourStr+=":";
+        }
         secStr = secStr.length() < 2 ? "0" + secStr : secStr;
         minStr = minStr.length() < 2 ? "0" + minStr : minStr;
-        hourStr = hourStr.length() < 2 ? "0" + hourStr : hourStr;
-        return hourStr + ":" + minStr + ":" + secStr;
+//        hourStr = hourStr.length() < 2 ? "0" + hourStr : hourStr;
+
+        return hourStr + minStr + ":" + secStr;
     }
 
 

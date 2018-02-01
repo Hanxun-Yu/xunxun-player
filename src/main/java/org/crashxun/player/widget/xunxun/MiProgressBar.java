@@ -131,7 +131,8 @@ public class MiProgressBar extends ProgressBar {
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setColor(Color.WHITE);
-        paint.setTextSize(getHeight() * 2 / 3);
+        paint.setTextSize(getHeight() * 3 / 4);
+        paint.setAlpha(180);
         return paint;
     }
 

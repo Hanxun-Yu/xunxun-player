@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
@@ -77,7 +78,7 @@ public class MiPlayControllerView implements IPlayControllerView {
         cursorView = mRoot.findViewById(R.id.cursorLayout);
         cursorText = mRoot.findViewById(R.id.cursorText);
         timeView = mRoot.findViewById(R.id.timeView);
-        timeView.setTextSize(60);
+        timeView.setTextSize(50);
         timeView.setTextBold(true);
 
         statusView = mRoot.findViewById(R.id.status_parent);
@@ -176,6 +177,7 @@ public class MiPlayControllerView implements IPlayControllerView {
             Log.d(TAG, "showStatusIcon:" + status);
             currentStatus = status;
             statusImg2.clearAnimation();
+            statusView.clearAnimation();
             switch (status) {
                 case forward:
                     statusImg1.setImageDrawable(null);
@@ -202,19 +204,14 @@ public class MiPlayControllerView implements IPlayControllerView {
                     break;
             }
             statusView.setVisibility(View.VISIBLE);
-
         }
     }
 
     @Override
     public void hideStatusIcon() {
         Log.d(TAG, "hideStatusIcon");
-
         currentStatus = null;
-        statusImg1.setImageDrawable(null);
-        statusImg2.setImageDrawable(null);
-        statusImg2.clearAnimation();
-        statusView.setVisibility(View.INVISIBLE);
+        statusView.startAnimation(getStatusHideAnim());
     }
 
     private void moveCursorView() {
@@ -231,8 +228,9 @@ public class MiPlayControllerView implements IPlayControllerView {
         cursorTop = miProgressBar.getBottom() - cursorView.getHeight();
         cursorRight = cursorLeft + cursorView.getWidth();
         cursorBottom = cursorTop + cursorView.getHeight();
+        Log.d(TAG,"miProgressBar.getBottom()="+miProgressBar.getBottom()+" cursorView.getHeight()="+cursorView.getHeight());
 
-//        Log.d(TAG,"cursorLeft="+cursorLeft+" cursorTop="+cursorTop);
+//        Log.d(TAG,"cursorLeft="+cursorLeft+" cursorTop="+cursorTop+" cursorRight="+cursorRight+" cursorBottom="+cursorBottom);
 
         //用一个第一阶段就生效的方式
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cursorView.getLayoutParams();
@@ -362,5 +360,50 @@ public class MiPlayControllerView implements IPlayControllerView {
 //        }
     }
 
+//    Animation getStatusShowAnim() {
+//        Animation maohaoVis = new AlphaAnimation(0f, 1f);
+//        maohaoVis.setDuration(500);
+//        maohaoVis.setAnimationListener(new Animation.AnimationListener() {
+//            @Override
+//            public void onAnimationStart(Animation animation) {
+//
+//            }
+//
+//            @Override
+//            public void onAnimationEnd(Animation animation) {
+//            }
+//
+//            @Override
+//            public void onAnimationRepeat(Animation animation) {
+//
+//            }
+//        });
+//        return maohaoVis;
+//    }
 
+    Animation getStatusHideAnim() {
+        Animation maohaoInvis = new AlphaAnimation(1f, 0f);
+        maohaoInvis.setDuration(500);
+        maohaoInvis.setFillAfter(true);
+        maohaoInvis.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                statusImg1.setImageDrawable(null);
+                statusImg2.setImageDrawable(null);
+                statusImg2.clearAnimation();
+//                statusView.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        return maohaoInvis;
+    }
 }
