@@ -215,5 +215,6 @@ public class TimeView extends RelativeLayout {
         }
 
         public String hour, minute, year, month, day;
+
     }
 }
