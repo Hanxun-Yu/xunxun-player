@@ -91,15 +91,15 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         // handle arguments
         mVideoPath = getIntent().getStringExtra("videoPath");
 //        mVideoPath = "http://10.1.1.201/bmq10m.mp4";
-        mVideoPath = "http://video.venjean.cn/sv/589e162b-1601585d5d7/589e162b-1601585d5d7.mp4";
-        mVideoPath = "http://192.168.199.205/vod/movie/No.Escape.2015.1080p.BluRay.x264-DRONES[rarbg]/No.Escape.2015.1080p.BluRay.x264-DRONES.mkv";
-        mVideoPath = "http://192.168.199.205//vod/movie/后天/后天 The.Day.After.Tomorrow.2004.BluRay.1080p.x264.DTS.AC3-HDiY.mkv";
-        try {
-            mVideoPath = URLEncoder.encode(mVideoPath,"utf-8");
-            mVideoPath = URLDecoder.decode(mVideoPath);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+//        mVideoPath = "http://video.venjean.cn/sv/589e162b-1601585d5d7/589e162b-1601585d5d7.mp4";
+//        mVideoPath = "http://192.168.199.205/vod/movie/No.Escape.2015.1080p.BluRay.x264-DRONES[rarbg]/No.Escape.2015.1080p.BluRay.x264-DRONES.mkv";
+//        mVideoPath = "http://192.168.199.205//vod/movie/后天/后天 The.Day.After.Tomorrow.2004.BluRay.1080p.x264.DTS.AC3-HDiY.mkv";
+//        try {
+//            mVideoPath = URLEncoder.encode(mVideoPath,"utf-8");
+//            mVideoPath = URLDecoder.decode(mVideoPath);
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
         Intent intent = getIntent();
         String intentAction = intent.getAction();
         if (!TextUtils.isEmpty(intentAction)) {

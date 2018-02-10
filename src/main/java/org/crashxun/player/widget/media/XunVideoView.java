@@ -1024,7 +1024,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 
     public IMediaPlayer createPlayer(int playerType) {
         IMediaPlayer mediaPlayer = null;
-
+        Log.d(TAG,"createPlayer playerType:"+playerType);
         switch (playerType) {
             case Settings.PV_PLAYER__IjkExoMediaPlayer: {
                 IjkExoMediaPlayer IjkExoMediaPlayer = new IjkExoMediaPlayer(mAppContext);
