@@ -58,6 +58,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     private static final String TAG = "VideoActivity";
 
     private String mVideoPath;
+    private String mVideoName;
     private Uri    mVideoUri;
 
     private IPlayController mMediaController;
@@ -90,6 +91,8 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
         // handle arguments
         mVideoPath = getIntent().getStringExtra("videoPath");
+        Log.d(TAG,"videoPath:"+mVideoPath);
+        mVideoName = getIntent().getStringExtra("videoName");
 //        mVideoPath = "http://10.1.1.201/bmq10m.mp4";
 //        mVideoPath = "http://video.venjean.cn/sv/589e162b-1601585d5d7/589e162b-1601585d5d7.mp4";
 //        mVideoPath = "http://192.168.199.205/vod/movie/No.Escape.2015.1080p.BluRay.x264-DRONES[rarbg]/No.Escape.2015.1080p.BluRay.x264-DRONES.mkv";
@@ -139,7 +142,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
 //        ActionBar actionBar = getSupportActionBar();
         mMediaController = new MiPlayController(this);
-        mMediaController.setTitle("hahaha");
+        mMediaController.setTitle(mVideoName);
 //        mMediaController.setSupportActionBar(actionBar);
 
         mToastTextView = (TextView) findViewById(R.id.toast_text_view);
