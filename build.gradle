@@ -11,7 +11,7 @@ android {
         abortOnError false
     }
     defaultConfig {
-        "org.crashxun.player"
+        applicationId "org.crashxun.player"
         minSdkVersion 15
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
