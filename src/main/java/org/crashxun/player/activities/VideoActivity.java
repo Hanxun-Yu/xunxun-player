@@ -51,6 +51,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
@@ -96,7 +97,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 //        mVideoPath = "http://10.1.1.201/bmq10m.mp4";
 //        mVideoPath = "http://video.venjean.cn/sv/589e162b-1601585d5d7/589e162b-1601585d5d7.mp4";
 //        mVideoPath = "http://192.168.199.205/vod/movie/No.Escape.2015.1080p.BluRay.x264-DRONES[rarbg]/No.Escape.2015.1080p.BluRay.x264-DRONES.mkv";
-//        mVideoPath = "http://192.168.199.205//vod/movie/后天/后天 The.Day.After.Tomorrow.2004.BluRay.1080p.x264.DTS.AC3-HDiY.mkv";
+        mVideoPath = "http://192.168.199.205//vod/movie/后天/后天 The.Day.After.Tomorrow.2004.BluRay.1080p.x264.DTS.AC3-HDiY.mkv";
 //        try {
 //            mVideoPath = URLEncoder.encode(mVideoPath,"utf-8");
 //            mVideoPath = URLDecoder.decode(mVideoPath);
@@ -157,6 +158,19 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
 
         mVideoView = (XunVideoView) findViewById(R.id.video_view);
+        mVideoView.setOnErrorListener(new IMediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(IMediaPlayer mp, int what, int extra) {
+
+                return false;
+            }
+        });
+        mVideoView.setOnCompletionListener(new IMediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(IMediaPlayer mp) {
+                finish();
+            }
+        });
         mVideoView.setMediaController(mMediaController);
 //        mVideoView.setHudView(mHudView);
         // prefer mVideoPath

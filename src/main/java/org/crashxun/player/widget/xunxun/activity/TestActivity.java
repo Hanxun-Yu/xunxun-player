@@ -1,0 +1,111 @@
+package org.crashxun.player.widget.xunxun.activity;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Rect;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+
+import org.crashxun.player.R;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by xunxun on 2018/2/12.
+ */
+
+public class TestActivity extends Activity {
+    MainSubMenu myPopupMenu;
+    RelativeLayout relativeLayout;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        relativeLayout = new RelativeLayout(this);
+        relativeLayout.setLayoutParams(new ViewGroup.LayoutParams(-1,-1));
+        setContentView(relativeLayout);
+
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_MENU) {
+            Intent intent = new Intent(this,MenuLeftActivity.class);
+            startActivity(intent);
+//            menu();
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+
+    void menu(){
+        if (myPopupMenu != null && myPopupMenu.isShowing()) {
+            myPopupMenu.dismiss();
+        } else {
+
+            List<MainSubMenu.MenuBean> bean = new ArrayList<>();
+            final MainSubMenu.MenuBean menuBean = new MainSubMenu.MenuBean();
+            List<MainSubMenu.MenuBean.MenuItemBean> itemBeanList = new ArrayList<>();
+            MainSubMenu.MenuBean.MenuItemBean itemBean = new MainSubMenu.MenuBean.MenuItemBean();
+            itemBean.itemName = "menu1";
+            itemBeanList.add(itemBean);
+            itemBean = new MainSubMenu.MenuBean.MenuItemBean();
+            itemBean.itemName = "menu2";
+            itemBeanList.add(itemBean);
+            itemBean = new MainSubMenu.MenuBean.MenuItemBean();
+            itemBean.itemName = "menu3";
+            itemBeanList.add(itemBean);
+            menuBean.menuID = "0";
+            menuBean.menuName = "MainMenu";
+            menuBean.menuItemBeanList = itemBeanList;
+            menuBean.superMenuID = null;
+            bean.add(menuBean);
+
+            myPopupMenu = new MainSubMenu(
+                    this,
+                    bean,
+                    286, 88);
+//                getResources().getDimensionPixelOffset(R.dimen.main_sub_menu_width),
+//                getResources().getDimensionPixelOffset(R.dimen.main_sub_menu_height));
+//            myPopupMenu.setAnimationStyle(R.style.LeftMenuAnim);
+            myPopupMenu.setSubMenuOnKeyListener(new MainSubMenu.SubMenuOnKeyListener() {
+                @Override
+                public boolean onSubMenuKey(PopupWindow pop, View v, int keyCode, KeyEvent event) {
+
+                    if (event.getAction() == KeyEvent.ACTION_UP) {
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            menu();
+                        }
+                    }
+                    return false;
+                }
+            });
+
+            //获取位置
+            final Rect viewRect = new Rect();
+            relativeLayout.getGlobalVisibleRect(viewRect);
+
+//        if (onSelectedChangedListener != null) {
+//            onSelectedChangedListener.onSelectedChanged(btnList.indexOf(v));
+//        }
+
+//        postDelayed(popupRunn = new Runnable() {
+//            @Override
+//            public void run() {
+            myPopupMenu.showAtLocation(relativeLayout,
+                    Gravity.NO_GRAVITY, viewRect.left, viewRect.height()/2);
+//            }
+//        }, 200);
+//        Log.d(TAG, "viewRect:" + viewRect.toShortString());
+        }
+    }
+
+}

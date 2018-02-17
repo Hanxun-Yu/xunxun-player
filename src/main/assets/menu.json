@@ -1,0 +1,85 @@
+[
+  {
+    "menuID": "0",
+    "menuName": "菜单",
+    "items": [
+      {
+        "itemID":"subtitle",
+        "itemName": "字幕设置",
+        "itemType": "menu",
+        "itemParams": ["1"],
+        "itemIcon":""
+      },
+      {
+        "itemID":"audio",
+        "itemName": "音轨选择",
+        "itemType": "menu",
+        "itemParams": ["2"],
+        "itemIcon":""
+      },
+      {
+        "itemID":"ratio",
+        "itemName": "画面比例",
+        "itemType": "menu",
+        "itemParams": ["3"],
+        "itemIcon":""
+      },
+      {
+        "itemID":"info",
+        "itemName": "影片信息",
+        "itemType": "activity",
+        "itemParams": ["package","activity"],
+        "itemIcon":""
+      }
+    ]
+  },
+  {
+    "menuID": "1",
+    "menuName": "字幕设置",
+    "superMenuID":"0",
+    "items": [
+      {
+        "itemID":"1",
+        "itemName": "关闭字幕",
+        "itemType": "radiobutton",
+        "itemParams": ["action","true","0"]
+      },
+      {
+        "itemID":"2",
+        "itemName": "自动下载字幕",
+        "itemType": "checkbox",
+        "itemParams": ["action","true","1"]
+      },
+      {
+        "itemID":"3",
+        "itemName": "校准时间轴",
+        "itemType": "activity",
+        "itemParams": ["package","activity"]
+      }
+    ]
+  },
+  {
+    "menuID": "2",
+    "menuName": "音轨选择",
+    "superMenuID":"0"
+  },
+  {
+    "menuID": "3",
+    "menuName": "画面比例",
+    "superMenuID":"0",
+    "items":[
+      {
+        "itemID":"1",
+        "itemName": "自适应",
+        "itemType": "radiobutton",
+        "itemParams": ["action","true","0"]
+      },
+      {
+        "itemID":"2",
+        "itemName": "全屏拉伸",
+        "itemType": "radiobutton",
+        "itemParams": ["action","false","0"]
+      }
+    ]
+  }
+]

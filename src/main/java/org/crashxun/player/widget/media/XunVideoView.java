@@ -745,7 +745,6 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 //        if (isInPlaybackState() && mMediaController != null) {
 //            toggleMediaControlsVisiblity();
 //        }
-
         return mMediaController.handlerEvent(ev);
     }
 
@@ -759,6 +758,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.d(TAG,"act onKeyDown keycode="+keyCode);
         boolean isKeyCodeSupported = keyCode != KeyEvent.KEYCODE_BACK &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_UP &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_DOWN &&
@@ -775,6 +775,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        Log.d(TAG,"act onKeyUp keycode="+keyCode);
         boolean isKeyCodeSupported = keyCode != KeyEvent.KEYCODE_BACK &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_UP &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_DOWN &&
