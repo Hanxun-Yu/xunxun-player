@@ -17,5 +17,6 @@ public interface IMenu {
     interface OnKeyListener {
         boolean onKey(KeyEvent event, IMenu iMenu);
         void onChildMenu(String childMenuID,IMenu iMenu);
+        void onSuperMenu(IMenu iMenu);
     }
 }

@@ -14,14 +14,14 @@
         "itemID":"audio",
         "itemName": "音轨选择",
         "itemType": "menu",
-        "itemParams": ["2"],
+        "itemParams": ["audioSub"],
         "itemIcon":""
       },
       {
         "itemID":"ratio",
         "itemName": "画面比例",
         "itemType": "menu",
-        "itemParams": ["3"],
+        "itemParams": ["ratioSub"],
         "itemIcon":""
       },
       {
@@ -40,18 +40,21 @@
     "items": [
       {
         "itemID":"1",
-        "itemName": "关闭字幕",
+        "itemName": "无字幕",
         "itemType": "radiobutton",
-        "itemParams": ["action","true","0"]
+        "itemParams": ["org.crashxun.player.action_subtitle_changed","true","0"],
+        "itemParamsKV":[{"org.crashxun.player.key_subtitle":"off"}]
       },
       {
         "itemID":"2",
         "itemName": "自动下载字幕",
         "itemType": "checkbox",
-        "itemParams": ["action","true","1"]
+        "itemParams": ["org.crashxun.player.action_subtitle_auto_download","true","1"],
+        "itemParamsKV":[{"org.crashxun.player.key_subtitle":"on"},{"org.crashxun.player.key_subtitle":"off"}]
+
       },
       {
-        "itemID":"3",
+        "itemID":"subtitle_adjust",
         "itemName": "校准时间轴",
         "itemType": "activity",
         "itemParams": ["package","activity"]
@@ -59,26 +62,29 @@
     ]
   },
   {
-    "menuID": "2",
+    "menuID": "audioSub",
     "menuName": "音轨选择",
     "superMenuID":"0"
   },
   {
-    "menuID": "3",
+    "menuID": "ratioSub",
     "menuName": "画面比例",
     "superMenuID":"0",
     "items":[
       {
-        "itemID":"1",
+        "itemID":"adapt",
         "itemName": "自适应",
         "itemType": "radiobutton",
-        "itemParams": ["action","true","0"]
+        "itemParams": ["org.crashxun.player.action_ratio_changed","true","0"],
+        "itemParamsKV":[{"org.crashxun.player.key_ratio":"adapt"}]
       },
       {
-        "itemID":"2",
+        "itemID":"stretch",
         "itemName": "全屏拉伸",
         "itemType": "radiobutton",
-        "itemParams": ["action","false","0"]
+        "itemParams": ["org.crashxun.player.action_ratio_changed","false","0"],
+        "itemParamsKV":[{"org.crashxun.player.key_ratio":"stretch"}]
+
       }
     ]
   }

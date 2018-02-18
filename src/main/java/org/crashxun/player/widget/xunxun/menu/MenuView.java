@@ -2,10 +2,12 @@ package org.crashxun.player.widget.xunxun.menu;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.internal.widget.ViewUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -32,6 +34,7 @@ import org.crashxun.player.widget.xunxun.ViewIDUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xunxun on 2018/2/12.
@@ -99,6 +102,8 @@ public class MenuView extends RelativeLayout implements IMenu {
                         btn = new MenuItemAct(getContext());
                         if(!menuBean.menuID.equals("0"))
                             btn.hideLeftIcon();
+
+                        if(menuBean.menuID.equals("subtitle_adjust"))
                         break;
                 }
 
@@ -139,9 +144,43 @@ public class MenuView extends RelativeLayout implements IMenu {
                 btn.setOnKeyListener(new View.OnKeyListener() {
                     @Override
                     public boolean onKey(View v, int keyCode, KeyEvent event) {
-                        if (onKeyListener != null)
+                        boolean handled = false;
+                        switch (item.itemType) {
+                            case activity:
+                                break;
+                            case menu:
+                                if(event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                                    lastFocus = v;
+                                    if (onKeyListener != null) {
+                                        onKeyListener.onChildMenu(item.itemParams[0], MenuView.this);
+                                    }
+                                    handled = true;
+                                }
+                                break;
+//                            case checkbox:
+//                                item.itemParams[1] = String.valueOf(!Boolean.parseBoolean(item.itemParams[1]));
+//                                finalBtn1.setParams(item.itemParams);
+//                                break;
+//                            case radiobutton:
+//                                onRadioButtonClick(v, item);
+//                                break;
+                        }
+
+                        if(event.getAction() == KeyEvent.ACTION_UP) {
+                            if( keyCode == KeyEvent.KEYCODE_DPAD_LEFT ||
+                                    keyCode == KeyEvent.KEYCODE_BACK) {
+                                if (onKeyListener != null) {
+                                    onKeyListener.onSuperMenu(MenuView.this);
+                                }
+                                handled = true;
+                            }
+                        }
+
+
+                        if (onKeyListener != null && !handled)
                             return onKeyListener.onKey(event, MenuView.this);
-                        return false;
+
+                        return handled;
                     }
                 });
                 final MenuItemView finalBtn = btn;
@@ -240,14 +279,30 @@ public class MenuView extends RelativeLayout implements IMenu {
                 MenuBean.MenuItemBean itemBean =  menuBean.items.get(i);
                 if(itemBean.itemType == MenuBean.MenuItemBean.ItemType.radiobutton) {
                     if(itemBean.itemParams[2].equals(item.itemParams[2])) {
-                        ((MenuItemCheckbox)getItemViewByID(itemBean.itemID)).setChecked(false);
                         itemBean.itemParams[1] = "false";
+                        ((MenuItemCheckbox)getItemViewByID(itemBean.itemID)).setParams(itemBean.itemParams);
                     }
                 }
             }
             item.itemParams[1] = "true";
-            menuItemCheckbox.setChecked(true);
+            menuItemCheckbox.setParams(item.itemParams);
+            sendBroadcast(item);
         }
+
+    }
+
+    private void sendBroadcast(MenuBean.MenuItemBean itemBean) {
+        Intent intent = new Intent(itemBean.itemParams[0]);
+
+        boolean checked = Boolean.parseBoolean(itemBean.itemParams[1]);
+
+        Map<String,String> param = checked?itemBean.itemParmasKV.get(0):itemBean.itemParmasKV.get(1);
+        for (String key : param.keySet()) {
+            intent.putExtra(key,param.get(key));
+        }
+//        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+        getContext().sendBroadcast(intent);
+        Log.d(TAG,"sendBroadcast intent:"+intent);
 
     }
 
@@ -407,7 +462,14 @@ public class MenuView extends RelativeLayout implements IMenu {
     }
 
     private void recoveryFocusable(View except) {
+        int index = 0;
         for (View view : menuItemViewList) {
+
+//            if(index == 0 && except==null) {
+//                view.setFocusable(true);
+//                view.requestFocus();
+//                index++;
+//            }
             if (view != except) {
                 view.setFocusable(true);
             }

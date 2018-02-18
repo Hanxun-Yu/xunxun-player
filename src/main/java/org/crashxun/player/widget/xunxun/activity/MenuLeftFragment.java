@@ -5,8 +5,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -18,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.crashxun.player.R;
+import org.crashxun.player.fragments.TracksFragment;
 import org.crashxun.player.widget.xunxun.common.Constant;
 import org.crashxun.player.widget.xunxun.menu.IMenu;
 import org.crashxun.player.widget.xunxun.menu.MenuBean;
@@ -26,7 +29,6 @@ import org.crashxun.player.widget.xunxun.menu.MenuView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +38,7 @@ import java.util.Map;
  * Created by xunxun on 2018/2/12.
  */
 
-public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
+public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
     RelativeLayout menuLayout;
     public List<IMenu> menus;
     private static List<MenuBean> data;
@@ -44,44 +46,73 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
 
     String TAG = "MenuLeftActivity_xunxun";
     TextView titleText;
+    View rootView;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.activity_left_menu,container,false);
+        menuLayout = rootView.findViewById(R.id.menuLayout);
+        titleText = rootView.findViewById(R.id.title);
+
+        return rootView;
+    }
+
+
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_left_menu);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        menuLayout = findViewById(R.id.menuLayout);
-        titleText = findViewById(R.id.title);
+        //        if (data == null) {
+        String res = getFromAssets(getContext(), "menu.json");
         titleText.setText("");
-//        if (data == null) {
-        String res = getFromAssets(this, "menu.json");
 
         Gson gson = new Gson();
         data = gson.fromJson(res, new TypeToken<List<MenuBean>>() {
         }.getType());
 //        }
-
         initParams();
         initDynamicMenu();
-        long start = System.currentTimeMillis();
-
         menus = getMenuView(data);
+
+        Log.d(TAG, "data:" + data);
+
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+
+//            }
+//        }, 100);
+
         addView(menuLayout);
-        long end = System.currentTimeMillis();
-        Log.d(TAG,"time:"+(end-start));
-//        Log.d(TAG, "data:" + data);
-        setTile(findMenuByID("0").getData().menuName);
-
-
-
 
     }
 
     @Override
-    protected void onStart() {
-        showShadow();
-        findMenuByID("0").onComeIn();
-        super.onStart();
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        Log.d(TAG,"setUserVisibleHint :"+isVisibleToUser);
+        if(isVisibleToUser) {
+            if(listener!=null)
+                listener.onShow();
+            setTile(findMenuByID("0").getData().menuName);
+            findMenuByID("0").onComeIn();
+            showShadow();
+        } else {
+
+        }
+    }
+
+    public static MenuLeftFragment newInstance() {
+        MenuLeftFragment f = new MenuLeftFragment();
+        return f;
+    }
+
+    String json;
+    public MenuLeftFragment setArgument(String params) {
+        this.json = params;
+        return this;
     }
 
     private void initParams() {
@@ -91,7 +122,6 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
         //影片信息
         //画面比例
 
-        String json = getIntent().getStringExtra("params");
         MenuParams params = new Gson().fromJson(json, MenuParams.class);
         for (MenuParams.MTrackInfo mTrackInfo : params.audioList) {
             MenuBean.MenuItemBean itemBean = new MenuBean.MenuItemBean();
@@ -149,35 +179,29 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
         parent.removeAllViews();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 
     private void showShadow() {
         AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
         alphaAnimation.setDuration(400);
         alphaAnimation.setFillAfter(true);
-        findViewById(R.id.shadow).startAnimation(alphaAnimation);
+        getView().findViewById(R.id.shadow).startAnimation(alphaAnimation);
     }
 
     private void hideShadow() {
         AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
         alphaAnimation.setDuration(400);
         alphaAnimation.setFillAfter(true);
-        findViewById(R.id.shadow).startAnimation(alphaAnimation);
+        getView().findViewById(R.id.shadow).startAnimation(alphaAnimation);
     }
 
 
     private List<IMenu> getMenuView(List<MenuBean> data) {
         List<IMenu> list = new ArrayList<>();
-        MenuView iMenu = null;
-        RelativeLayout.LayoutParams params = null;
         for (MenuBean menuBean : data) {
-            iMenu = new MenuView(this);
+            MenuView iMenu = new MenuView(getContext());
             iMenu.setData(menuBean, 400, 100);
             iMenu.setOnKeyListener(this);
-            params = new RelativeLayout.LayoutParams(-2, -2);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(-2, -2);
             params.addRule(RelativeLayout.CENTER_IN_PARENT);
             iMenu.setLayoutParams(params);
             list.add(iMenu);
@@ -185,19 +209,21 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
         return list;
     }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Log.d("xunxun", "onKeyUp ");
-        return super.onKeyUp(keyCode, event);
-    }
 
-    @Override
-    public void finish() {
-        super.finish();
-//        overridePendingTransition(0, R.anim.act_left_menu_out);
-        overridePendingTransition(0, 0);
 
-    }
+//    @Override
+//    public boolean onKeyUp(int keyCode, KeyEvent event) {
+//        Log.d("xunxun", "onKeyUp ");
+//        return super.onKeyUp(keyCode, event);
+//    }
+
+//    @Override
+//    public void finish() {
+//        super.finish();
+////        overridePendingTransition(0, R.anim.act_left_menu_out);
+//        overridePendingTransition(0, 0);
+//
+//    }
 
     public String getFromAssets(Context context, String fileName) {
         try {
@@ -224,14 +250,14 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
     public boolean onKey(KeyEvent event, IMenu iMenu) {
         Log.d(TAG, "onKey action:" + event.getAction() + " code:" + event.getKeyCode() + " iMenu:" + iMenu.getData().menuID);
         boolean ret = false;
-        if (event.getAction() == KeyEvent.ACTION_UP) {
-            switch (event.getKeyCode()) {
-                case KeyEvent.KEYCODE_BACK:
-                    handleKeyBack(iMenu);
-                    ret = true;
-                    break;
-            }
-        }
+//        if (event.getAction() == KeyEvent.ACTION_UP) {
+//            switch (event.getKeyCode()) {
+//                case KeyEvent.KEYCODE_BACK:
+//                    handleKeyBack(iMenu);
+//                    ret = true;
+//                    break;
+//            }
+//        }
         return ret;
     }
 
@@ -244,11 +270,6 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
 
     @Override
     public void onSuperMenu(IMenu iMenu) {
-
-    }
-
-
-    private void handleKeyBack(IMenu iMenu) {
         iMenu.onDismiss();
         if (iMenu.getData().menuID.equals("0")) {
             hideShadow();
@@ -256,14 +277,22 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    finish();
+//                    finish();
+                    if(listener!=null) {
+                        listener.onClose();
+                    }
                 }
             }, 400);
+
+
         } else {
             findMenuByID(iMenu.getData().superMenuID).onComeback();
             setTile(findMenuByID(iMenu.getData().superMenuID).getData().menuName);
         }
     }
+
+
+
 
     IMenu findMenuByID(String id) {
         for (IMenu iMenu : menus) {
@@ -300,4 +329,14 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
         titleText.startAnimation(oldAnim);
     }
 
+    MenuEventListener listener;
+
+    public void setListener(MenuEventListener listener) {
+        this.listener = listener;
+    }
+
+    public interface MenuEventListener {
+        void onClose();
+        void onShow();
+    }
 }

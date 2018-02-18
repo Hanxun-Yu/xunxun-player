@@ -86,7 +86,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_player);
+        setContentView(R.layout.activity_player_xunxun);
 
 //        mSettings = new Settings(this);
 
@@ -97,7 +97,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 //        mVideoPath = "http://10.1.1.201/bmq10m.mp4";
 //        mVideoPath = "http://video.venjean.cn/sv/589e162b-1601585d5d7/589e162b-1601585d5d7.mp4";
 //        mVideoPath = "http://192.168.199.205/vod/movie/No.Escape.2015.1080p.BluRay.x264-DRONES[rarbg]/No.Escape.2015.1080p.BluRay.x264-DRONES.mkv";
-        mVideoPath = "http://192.168.199.205//vod/movie/后天/后天 The.Day.After.Tomorrow.2004.BluRay.1080p.x264.DTS.AC3-HDiY.mkv";
+        mVideoPath = "http://10.1.1.201/Blade.Runner.2049.2017.BD1080P.X264.DTS-HD.MA.7.1.Mandarin&English.CHS-ENG.Mp4BaFans.mkv";
 //        try {
 //            mVideoPath = URLEncoder.encode(mVideoPath,"utf-8");
 //            mVideoPath = URLDecoder.decode(mVideoPath);
@@ -148,10 +148,10 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
         mToastTextView = (TextView) findViewById(R.id.toast_text_view);
 //        mHudView = (TableLayout) findViewById(R.id.hud_view);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
 
-        mDrawerLayout.setScrimColor(Color.TRANSPARENT);
+//        mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);

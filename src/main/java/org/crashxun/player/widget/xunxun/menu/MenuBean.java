@@ -1,16 +1,18 @@
 package org.crashxun.player.widget.xunxun.menu;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class MenuBean {
     public String menuID;
     public String menuName;
     public String superMenuID;//if null then rootMenu
-    public List<MenuItemBean> items;
+    public List<MenuItemBean> items = new ArrayList<>();
 
     public static class MenuItemBean {
-        enum ItemType {
+        public enum ItemType {
             activity, checkbox, radiobutton, menu
         }
         public String itemID;
@@ -28,6 +30,7 @@ public class MenuBean {
          * 0.childMenuID
          */
         public String[] itemParams;
+        public List<Map<String,String>> itemParmasKV = new ArrayList<>();
 
         @Override
         public String toString() {
@@ -37,6 +40,7 @@ public class MenuBean {
                     ", itemType=" + itemType +
                     ", itemIcon='" + itemIcon + '\'' +
                     ", itemParams=" + Arrays.toString(itemParams) +
+                    ", itemParmasKV=" + itemParmasKV +
                     '}';
         }
     }

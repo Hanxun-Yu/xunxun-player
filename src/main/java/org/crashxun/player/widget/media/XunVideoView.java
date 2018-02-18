@@ -16,14 +16,24 @@ package org.crashxun.player.widget.media;/*
 
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -37,10 +47,17 @@ import android.widget.MediaController;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import org.crashxun.player.R;
 import org.crashxun.player.application.Settings;
+import org.crashxun.player.fragments.TracksFragment;
 import org.crashxun.player.services.MediaPlayerService;
+import org.crashxun.player.widget.xunxun.activity.MenuLeftActivity;
+import org.crashxun.player.widget.xunxun.activity.MenuLeftFragment;
 import org.crashxun.player.widget.xunxun.api.IPlayController;
+import org.crashxun.player.widget.xunxun.common.Constant;
+import org.crashxun.player.widget.xunxun.menu.MenuParams;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +65,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -181,6 +200,8 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 Gravity.BOTTOM);
         addView(subtitleDisplay, layoutParams_txt);
+
+        registMenuEvent();
     }
 
     public void setRenderView(IRenderView renderView) {
@@ -338,7 +359,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                     (TextUtils.isEmpty(scheme) || scheme.equalsIgnoreCase("file"))) {
                 IMediaDataSource dataSource = new FileMediaDataSource(new File(mUri.toString()));
                 mMediaPlayer.setDataSource(dataSource);
-            }  else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 mMediaPlayer.setDataSource(mAppContext, mUri, mHeaders);
             } else {
                 mMediaPlayer.setDataSource(mUri.toString());
@@ -411,7 +432,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
         public void onPrepared(IMediaPlayer mp) {
             mPrepareEndTime = System.currentTimeMillis();
-            if(mHudViewHolder != null)
+            if (mHudViewHolder != null)
                 mHudViewHolder.updateLoadCost(mPrepareEndTime - mPrepareStartTime);
             mCurrentState = STATE_PREPARED;
 
@@ -462,6 +483,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                     start();
                 }
             }
+            initMenu();
         }
     };
 
@@ -588,7 +610,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
             new IMediaPlayer.OnBufferingUpdateListener() {
                 public void onBufferingUpdate(IMediaPlayer mp, int percent) {
                     mCurrentBufferPercentage = percent;
-                    mMediaController.onPlayerBufferingUpdate(String.valueOf(percent),"");
+                    mMediaController.onPlayerBufferingUpdate(String.valueOf(percent), "");
                 }
             };
 
@@ -597,7 +619,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         @Override
         public void onSeekComplete(IMediaPlayer mp) {
             mSeekEndTime = System.currentTimeMillis();
-            if(mHudViewHolder != null)
+            if (mHudViewHolder != null)
                 mHudViewHolder.updateSeekCost(mSeekEndTime - mSeekStartTime);
             mMediaController.onPlayerSeekCompleted();
         }
@@ -740,6 +762,12 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        unregistMenuEvent();
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
 //        Log.d("xunxun","videoview onTouchEvent:"+ev);
 //        if (isInPlaybackState() && mMediaController != null) {
@@ -758,7 +786,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG,"act onKeyDown keycode="+keyCode);
+        Log.d(TAG, "act onKeyDown keycode=" + keyCode);
         boolean isKeyCodeSupported = keyCode != KeyEvent.KEYCODE_BACK &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_UP &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_DOWN &&
@@ -773,21 +801,189 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         return super.onKeyDown(keyCode, event);
     }
 
+    private void initMenu() {
+        MenuLeftFragment f = MenuLeftFragment.newInstance().setArgument(getMenuParams());
+        f.setListener(new MenuLeftFragment.MenuEventListener() {
+            @Override
+            public void onClose() {
+                XunVideoView.this.setFocusable(true);
+            }
+
+            @Override
+            public void onShow() {
+                XunVideoView.this.setFocusable(false);
+            }
+        });
+        FragmentTransaction transaction = ((FragmentActivity) getContext()).getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.right_drawer, f);
+        transaction.commit();
+    }
+
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Log.d(TAG,"act onKeyUp keycode="+keyCode);
+        Log.d(TAG, "act onKeyUp keycode=" + keyCode);
         boolean isKeyCodeSupported = keyCode != KeyEvent.KEYCODE_BACK &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_UP &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_DOWN &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_MUTE &&
-                keyCode != KeyEvent.KEYCODE_MENU &&
                 keyCode != KeyEvent.KEYCODE_CALL &&
                 keyCode != KeyEvent.KEYCODE_ENDCALL;
-        if (isInPlaybackState() && isKeyCodeSupported && mMediaController != null) {
+
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+//            Intent intent = new Intent(getContext(), MenuLeftActivity.class);
+//            intent.putExtra("params",getMenuParams());
+//            getContext().startActivity(intent);
+
+            MenuLeftFragment f = (MenuLeftFragment) ((FragmentActivity) getContext()).getSupportFragmentManager().findFragmentById(R.id.right_drawer);
+            if (f != null) {
+//                FragmentTransaction transaction = ((FragmentActivity) getContext()).getSupportFragmentManager().beginTransaction();
+//                transaction.remove(f);
+//                transaction.commit();
+//                f.setArgument(getMenuParams());
+                f.setUserVisibleHint(true);
+            }
+            return true;
+        }
+
+        if (isInPlaybackState() && isKeyCodeSupported && mMediaController != null){
             return mMediaController.handlerEvent(event);
         }
         return super.onKeyUp(keyCode, event);
+
     }
+
+    private String getMenuParams() {
+        MenuParams menuParams = new MenuParams();
+        menuParams.audioList = new ArrayList<>();
+        menuParams.internalSubtitleList = new ArrayList<>();
+        menuParams.externalSubtitleList = new ArrayList<>();
+
+        //音轨列表
+        //字幕列表
+        int selectedAudioTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
+        int selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
+
+        ITrackInfo trackInfos[] = mMediaPlayer.getTrackInfo();
+        if (trackInfos != null) {
+            int index = -1;
+            for (ITrackInfo trackInfo : trackInfos) {
+                index++;
+                int trackType = trackInfo.getTrackType();
+//                builder.appendRow2(R.string.mi_type, buildTrackType(trackType));
+//                builder.appendRow2(R.string.mi_language, buildLanguage(trackInfo.getLanguage()));
+
+                IMediaFormat mediaFormat = trackInfo.getFormat();
+                if (mediaFormat == null) {
+                } else if (mediaFormat instanceof IjkMediaFormat) {
+                    switch (trackType) {
+//                        case ITrackInfo.MEDIA_TRACK_TYPE_SUBTITLE:
+//                            break;
+                        case ITrackInfo.MEDIA_TRACK_TYPE_AUDIO:
+                            MenuParams.MTrackInfo mTrackInfo = new MenuParams.MTrackInfo();
+                            mTrackInfo.trackIndex = index;
+                            mTrackInfo.selected = index == selectedAudioTrack;
+                            mTrackInfo.trackName = buildLanguage(trackInfo.getLanguage());
+
+                            String[] infoline = trackInfo.getInfoInline().split(",");
+                            if (infoline.length > 1) {
+                                mTrackInfo.trackName += " " + infoline[1];
+                            }
+                            menuParams.audioList.add(mTrackInfo);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        //画面比例
+        menuParams.ratio = getRatioStr(getCurrentRatio());
+
+        //字幕延迟时间
+        //影片信息
+
+
+        return new Gson().toJson(menuParams);
+    }
+
+    BroadcastReceiver menuEventReceiver;
+
+    private void registMenuEvent() {
+        Log.d(TAG, "registMenuEvent");
+        menuEventReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "menuEventReceiver----intent:" + intent);
+//                Log.d(TAG,"menuEventReceiver----intent:"+intent.getExtras());
+                switch (intent.getAction()) {
+                    case Constant.ACTION_AUDIO_CHANGED:
+                        int trackIndex = Integer.parseInt(intent.getStringExtra(Constant.KEY_PARAMS_AUDIO));
+                        Log.d(TAG, "getCurrentPosition----:" + getCurrentPosition());
+                        int position = getCurrentPosition();
+                        selectTrack(trackIndex);
+
+                        seekTo(position - 1000);
+
+                        break;
+                }
+            }
+        };
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constant.ACTION_AUDIO_CHANGED);
+        intentFilter.addAction(Constant.ACTION_SUBTITLE_AUTO_DOWNLOAD);
+        intentFilter.addAction(Constant.ACTION_RATIO_CHANGED);
+        intentFilter.addAction(Constant.ACTION_SUBTITLE_CHANGED);
+        intentFilter.addAction(Constant.ACTION_SUBTITLE_TIME_ADJUST);
+
+//        LocalBroadcastManager.getInstance(getContext()).registerReceiver(menuEventReceiver,intentFilter);
+        getContext().registerReceiver(menuEventReceiver, intentFilter);
+
+//        handler.sendEmptyMessage(0);
+    }
+
+//    Handler handler =new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            Log.d(TAG,"getCurrentPosition()="+getCurrentPosition());
+//            sendEmptyMessageDelayed(0,1000);
+//
+//        }
+//    };
+
+    private void unregistMenuEvent() {
+        Log.d(TAG, "unregistMenuEvent");
+        if (menuEventReceiver != null) {
+//            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(menuEventReceiver);
+            getContext().unregisterReceiver(menuEventReceiver);
+        }
+    }
+
+    private String getRatioStr(int ratio) {
+        String ret = null;
+        switch (ratio) {
+            case IRenderView.AR_ASPECT_FILL_PARENT:
+                ret = Constant.VAULE_PARAMS_RATIO_stretch;
+                break;
+            case IRenderView.AR_ASPECT_WRAP_CONTENT:
+                ret = Constant.VAULE_PARAMS_RATIO_adapte;
+                break;
+        }
+        return ret;
+    }
+
+    int currentRatio = IRenderView.AR_ASPECT_WRAP_CONTENT;
+
+    private int getCurrentRatio() {
+        return currentRatio;
+    }
+
+    private void setCurrentRatio(int ratio) {
+        currentRatio = ratio;
+        mRenderView.setAspectRatio(ratio);
+    }
+
 
 //    private void toggleMediaControlsVisiblity() {
 //        if (mMediaController.isShowing()) {
@@ -844,6 +1040,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 
     @Override
     public void seekTo(int msec) {
+        Log.d(TAG, "seekTo:" + msec);
         if (isInPlaybackState()) {
             mSeekStartTime = System.currentTimeMillis();
             mMediaPlayer.seekTo(msec);
@@ -1025,7 +1222,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 
     public IMediaPlayer createPlayer(int playerType) {
         IMediaPlayer mediaPlayer = null;
-        Log.d(TAG,"createPlayer playerType:"+playerType);
+        Log.d(TAG, "createPlayer playerType:" + playerType);
         switch (playerType) {
             case Settings.PV_PLAYER__IjkExoMediaPlayer: {
                 IjkExoMediaPlayer IjkExoMediaPlayer = new IjkExoMediaPlayer(mAppContext);
@@ -1080,7 +1277,6 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 //                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
 //
 //                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
-
 
 
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
@@ -1258,6 +1454,12 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     private String buildLanguage(String language) {
         if (TextUtils.isEmpty(language))
             return "und";
+        else {
+            if (language.equals("chi")) {
+                return "中";
+            } else if (language.equals("eng"))
+                return "英";
+        }
         return language;
     }
 

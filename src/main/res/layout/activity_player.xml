@@ -53,8 +53,8 @@
 
     <!-- The navigation drawer -->
     <FrameLayout android:id="@+id/right_drawer"
-        android:layout_width="240dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="right"
+        android:layout_gravity="left"
         android:background="@color/ijk_transparent_dark" />
 </android.support.v4.widget.DrawerLayout>
