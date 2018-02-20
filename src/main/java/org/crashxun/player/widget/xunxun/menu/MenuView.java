@@ -49,24 +49,38 @@ public class MenuView extends RelativeLayout implements IMenu {
 
     public MenuView(@NonNull Context context) {
         super(context);
-        setClipChildren(false);
-        setClipToPadding(false);
-        handler = new Handler(context.getMainLooper());
+        init();
     }
 
-    public void setData(MenuBean menuBean, int itemWidth, int itemHeight) {
+    public MenuView(@NonNull Context context,int itemWidth, int itemHeight) {
+        super(context);
+        init();
+        this.itemWidth  = itemWidth;
+        this.itemHeight = itemHeight;
+    }
+
+    int itemWidth;
+    int itemHeight;
+    private void init() {
+        setClipChildren(false);
+        setClipToPadding(false);
+        handler = new Handler(getContext().getMainLooper());
+    }
+
+    public void setData(MenuBean menuBean) {
         this.menuBean = menuBean;
         menuItemViewList = new ArrayList<>();
         initLayout(menuBean, itemWidth, itemHeight);
         onInitAnim();
     }
 
-
+    ScrollView scrollView;
     private void initLayout(final MenuBean menuBean, int itemWidth, int itemHeight) {
         this.setBackgroundDrawable(null);
-        ScrollView sv = new ScrollView(getContext());
-        sv.setFocusable(false);
-        sv.setVerticalScrollBarEnabled(false);
+        removeAllViews();
+        scrollView = new ScrollView(getContext());
+        scrollView.setFocusable(false);
+        scrollView.setVerticalScrollBarEnabled(false);
 
 
 //        sv.setLayoutParams(new ScrollView.LayoutParams(
@@ -74,7 +88,7 @@ public class MenuView extends RelativeLayout implements IMenu {
 
 
         RelativeLayout relativeLayout = new RelativeLayout(getContext());
-        sv.addView(relativeLayout);
+        scrollView.addView(relativeLayout);
         ScrollView.LayoutParams llparams = new ScrollView.LayoutParams(
                 ScrollView.LayoutParams.MATCH_PARENT, ScrollView.LayoutParams.WRAP_CONTENT);
         relativeLayout.setLayoutParams(llparams);
@@ -260,12 +274,12 @@ public class MenuView extends RelativeLayout implements IMenu {
         RelativeLayout.LayoutParams scrollViewParams = new RelativeLayout.LayoutParams(
                 ScrollView.LayoutParams.MATCH_PARENT, 450);
         scrollViewParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-        sv.setClipToPadding(false);
-        sv.setClipChildren(false);
-        sv.setPadding(0, 0, 0, 0);
-        sv.setLayoutParams(scrollViewParams);
+        scrollView.setClipToPadding(false);
+        scrollView.setClipChildren(false);
+        scrollView.setPadding(0, 0, 0, 0);
+        scrollView.setLayoutParams(scrollViewParams);
 
-        addView(sv);
+        addView(scrollView);
     }
 
     private void onRadioButtonClick(View v, MenuBean.MenuItemBean item) {
@@ -296,7 +310,7 @@ public class MenuView extends RelativeLayout implements IMenu {
 
         boolean checked = Boolean.parseBoolean(itemBean.itemParams[1]);
 
-        Map<String,String> param = checked?itemBean.itemParmasKV.get(0):itemBean.itemParmasKV.get(1);
+        Map<String,String> param = checked?itemBean.itemParamsKV.get(0):itemBean.itemParamsKV.get(1);
         for (String key : param.keySet()) {
             intent.putExtra(key,param.get(key));
         }
@@ -334,8 +348,8 @@ public class MenuView extends RelativeLayout implements IMenu {
     public void onComeIn() {
         Log.d(TAG, "onComeIn" + " left:" + getLeft() + " top:" + getTop());
 //        setVisibility(View.VISIBLE);
+        scrollView.scrollTo(0,0);
         hided = false;
-
         int delay = 0;
         for (final View view : menuItemViewList) {
             final Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.left_menu_comein);
@@ -482,6 +496,7 @@ public class MenuView extends RelativeLayout implements IMenu {
     public void onDismiss() {
         lastFocus = null;
         hided = true;
+        View focusView = null;
         for (final View view : menuItemViewList) {
             Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.left_menu_dismiss);
             animation.setFillAfter(true);
@@ -500,9 +515,14 @@ public class MenuView extends RelativeLayout implements IMenu {
 
                 }
             });
-            view.setFocusable(false);
+            //有焦点的view最后清除焦点，避免scrollview滑动到底部
+            if(!view.isFocused())
+                view.setFocusable(false);
+            else
+                focusView = view;
             view.startAnimation(animation);
         }
+        focusView.setFocusable(false);
     }
 
 

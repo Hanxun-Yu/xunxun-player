@@ -7,7 +7,7 @@
         "itemID":"subtitle",
         "itemName": "字幕设置",
         "itemType": "menu",
-        "itemParams": ["1"],
+        "itemParams": ["subtitleSub"],
         "itemIcon":""
       },
       {
@@ -34,7 +34,7 @@
     ]
   },
   {
-    "menuID": "1",
+    "menuID": "subtitleSub",
     "menuName": "字幕设置",
     "superMenuID":"0",
     "items": [

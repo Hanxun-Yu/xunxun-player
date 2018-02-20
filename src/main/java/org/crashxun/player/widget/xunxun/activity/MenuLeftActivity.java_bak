@@ -101,7 +101,7 @@ public class MenuLeftActivity extends Activity implements IMenu.OnKeyListener {
                     mTrackInfo.selected ? "true" : "false", "1"};
             Map<String,String> itemParams = new HashMap<>();
             itemParams.put(Constant.KEY_PARAMS_AUDIO,String.valueOf(mTrackInfo.trackIndex));
-            itemBean.itemParmasKV.add(itemParams);
+            itemBean.itemParamsKV.add(itemParams);
             itemBean.itemID = String.valueOf(mTrackInfo.trackIndex);
             getAudioMenu().items.add(itemBean);
         }

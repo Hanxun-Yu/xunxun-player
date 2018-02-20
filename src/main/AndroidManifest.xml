@@ -24,6 +24,7 @@
          >
         <activity
             android:name=".activities.VideoActivity"
+            android:hardwareAccelerated="true"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="user"
@@ -50,12 +51,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".widget.xunxun.activity.TestActivity">
+        <!--<activity android:name=".widget.xunxun.activity.TestActivity">-->
 
-        </activity>
+        <!--</activity>-->
 
-        <activity android:name=".widget.xunxun.activity.MenuLeftActivity"
-            android:theme="@style/LeftMenu" />
+        <!--<activity android:name=".widget.xunxun.activity.MenuLeftActivity"-->
+            <!--android:theme="@style/LeftMenu" />-->
 
         <service
             android:name=".services.MediaPlayerService"

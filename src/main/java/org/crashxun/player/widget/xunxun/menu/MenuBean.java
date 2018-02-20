@@ -30,7 +30,7 @@ public class MenuBean {
          * 0.childMenuID
          */
         public String[] itemParams;
-        public List<Map<String,String>> itemParmasKV = new ArrayList<>();
+        public List<Map<String,String>> itemParamsKV = new ArrayList<>();
 
         @Override
         public String toString() {
@@ -40,7 +40,7 @@ public class MenuBean {
                     ", itemType=" + itemType +
                     ", itemIcon='" + itemIcon + '\'' +
                     ", itemParams=" + Arrays.toString(itemParams) +
-                    ", itemParmasKV=" + itemParmasKV +
+                    ", itemParamsKV=" + itemParamsKV +
                     '}';
         }
     }

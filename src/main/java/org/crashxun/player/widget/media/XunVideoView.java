@@ -27,6 +27,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -53,7 +54,6 @@ import org.crashxun.player.R;
 import org.crashxun.player.application.Settings;
 import org.crashxun.player.fragments.TracksFragment;
 import org.crashxun.player.services.MediaPlayerService;
-import org.crashxun.player.widget.xunxun.activity.MenuLeftActivity;
 import org.crashxun.player.widget.xunxun.activity.MenuLeftFragment;
 import org.crashxun.player.widget.xunxun.api.IPlayController;
 import org.crashxun.player.widget.xunxun.common.Constant;
@@ -82,7 +82,7 @@ import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.player.misc.IjkMediaFormat;
 
 public class XunVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
-    private String TAG = "IjkVideoView_xunxun";
+    private String TAG = "XunVideoView_xunxun";
     // settable by the client
     private Uri mUri;
     private Map<String, String> mHeaders;
@@ -628,6 +628,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     private IMediaPlayer.OnTimedTextListener mOnTimedTextListener = new IMediaPlayer.OnTimedTextListener() {
         @Override
         public void onTimedText(IMediaPlayer mp, IjkTimedText text) {
+            Log.d(TAG,"onTimedText text:"+text);
             if (text != null) {
                 subtitleDisplay.setText(text.getText());
             }
@@ -801,8 +802,10 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         return super.onKeyDown(keyCode, event);
     }
 
+    MenuParams mMenuParams;
+
     private void initMenu() {
-        MenuLeftFragment f = MenuLeftFragment.newInstance().setArgument(getMenuParams());
+        MenuLeftFragment f = MenuLeftFragment.newInstance(getMenuParams());
         f.setListener(new MenuLeftFragment.MenuEventListener() {
             @Override
             public void onClose() {
@@ -845,7 +848,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
             return true;
         }
 
-        if (isInPlaybackState() && isKeyCodeSupported && mMediaController != null){
+        if (isInPlaybackState() && isKeyCodeSupported && mMediaController != null) {
             return mMediaController.handlerEvent(event);
         }
         return super.onKeyUp(keyCode, event);
@@ -853,15 +856,18 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     private String getMenuParams() {
-        MenuParams menuParams = new MenuParams();
-        menuParams.audioList = new ArrayList<>();
-        menuParams.internalSubtitleList = new ArrayList<>();
-        menuParams.externalSubtitleList = new ArrayList<>();
+        mMenuParams = new MenuParams();
+        mMenuParams.audioList = new ArrayList<>();
+        mMenuParams.internalSubtitleList = new ArrayList<>();
+        mMenuParams.externalSubtitleList = new ArrayList<>();
 
         //音轨列表
         //字幕列表
         int selectedAudioTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
         int selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
+
+
+        Log.d(TAG, "selectedSubtitleTrack:" + selectedSubtitleTrack);
 
         ITrackInfo trackInfos[] = mMediaPlayer.getTrackInfo();
         if (trackInfos != null) {
@@ -888,7 +894,14 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                             if (infoline.length > 1) {
                                 mTrackInfo.trackName += " " + infoline[1];
                             }
-                            menuParams.audioList.add(mTrackInfo);
+                            mMenuParams.audioList.add(mTrackInfo);
+                            break;
+                        case ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT:
+                            mTrackInfo = new MenuParams.MTrackInfo();
+                            mTrackInfo.trackIndex = index;
+                            mTrackInfo.selected = index == selectedSubtitleTrack;
+                            mTrackInfo.trackName = "内嵌" + (mMenuParams.internalSubtitleList.size() + 1)+" " + buildLanguage(trackInfo.getLanguage());
+                            mMenuParams.internalSubtitleList.add(mTrackInfo);
                             break;
                         default:
                             break;
@@ -897,13 +910,13 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
             }
         }
         //画面比例
-        menuParams.ratio = getRatioStr(getCurrentRatio());
+        mMenuParams.ratio = getRatioStr(getCurrentRatio());
 
         //字幕延迟时间
         //影片信息
 
 
-        return new Gson().toJson(menuParams);
+        return new Gson().toJson(mMenuParams);
     }
 
     BroadcastReceiver menuEventReceiver;
@@ -918,11 +931,51 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                 switch (intent.getAction()) {
                     case Constant.ACTION_AUDIO_CHANGED:
                         int trackIndex = Integer.parseInt(intent.getStringExtra(Constant.KEY_PARAMS_AUDIO));
-                        Log.d(TAG, "getCurrentPosition----:" + getCurrentPosition());
+//                        Log.d(TAG, "getCurrentPosition----:" + getCurrentPosition());
                         int position = getCurrentPosition();
                         selectTrack(trackIndex);
-
                         seekTo(position - 1000);
+                        Log.d(TAG, "menuEventReceiver----ACTION_AUDIO_CHANGED:" + trackIndex);
+                        int selectedAudioTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
+                        Log.d(TAG, "menuEventReceiver----selectedAudioTrack:" + selectedAudioTrack);
+
+                        break;
+
+                    case Constant.ACTION_RATIO_CHANGED:
+                        String params = intent.getStringExtra(Constant.KEY_PARAMS_RATIO);
+                        Log.d(TAG, "menuEventReceiver----ACTION_RATIO_CHANGED:" + params);
+                        int ratio = 0;
+                        if (params.equals("stretch"))
+                            ratio = IRenderView.AR_MATCH_PARENT;
+                        else if (params.equals("adapt"))
+                            ratio = IRenderView.AR_ASPECT_FIT_PARENT;
+                        setCurrentRatio(ratio);
+                        break;
+
+                    case Constant.ACTION_SUBTITLE_CHANGED:
+                        params = intent.getStringExtra(Constant.KEY_PARAMS_SUBTITLE);
+                        int selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
+                        if (params.equals("off")) {
+                            //内字幕
+                            if (selectedSubtitleTrack != -1) {
+                                deselectTrack(selectedSubtitleTrack);
+                            }
+
+                            //外字幕
+
+                        } else {
+                            trackIndex = Integer.parseInt(params);
+                            Log.d(TAG, "menuEventReceiver----ACTION_SUBTITLE_CHANGED:" + trackIndex);
+
+                            for (MenuParams.MTrackInfo mTrackInfo : mMenuParams.internalSubtitleList) {
+                                if (mTrackInfo.trackIndex == trackIndex) {
+                                    selectTrack(trackIndex);
+                                    break;
+                                }
+                            }
+                        }
+                        selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
+                        Log.d(TAG, "menuEventReceiver----selectedSubtitleTrack:" + selectedSubtitleTrack);
 
                         break;
                 }
@@ -1471,6 +1524,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     public void selectTrack(int stream) {
+        Log.d(TAG, "selectTrack----stream:" + stream);
         MediaPlayerCompat.selectTrack(mMediaPlayer, stream);
     }
 

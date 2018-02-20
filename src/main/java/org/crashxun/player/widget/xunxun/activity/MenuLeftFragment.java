@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -51,69 +52,63 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.activity_left_menu,container,false);
+        View rootView = inflater.inflate(R.layout.activity_left_menu, container, false);
         menuLayout = rootView.findViewById(R.id.menuLayout);
         titleText = rootView.findViewById(R.id.title);
-
+        titleText.setText("");
         return rootView;
     }
 
-
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        create();
+    }
+
+    private void create() {
         //        if (data == null) {
         String res = getFromAssets(getContext(), "menu.json");
-        titleText.setText("");
-
         Gson gson = new Gson();
         data = gson.fromJson(res, new TypeToken<List<MenuBean>>() {
         }.getType());
-//        }
-        initParams();
-        initDynamicMenu();
         menus = getMenuView(data);
 
-        Log.d(TAG, "data:" + data);
 
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-
-//            }
-//        }, 100);
-
+        initParams();
         addView(menuLayout);
-
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        Log.d(TAG,"setUserVisibleHint :"+isVisibleToUser);
-        if(isVisibleToUser) {
-            if(listener!=null)
+        Log.d(TAG, "setUserVisibleHint :" + isVisibleToUser);
+        if (isVisibleToUser) {
+            if (listener != null)
                 listener.onShow();
             setTile(findMenuByID("0").getData().menuName);
-            findMenuByID("0").onComeIn();
+            currentMenuView = findMenuByID("0");
+            currentMenuView.onComeIn();
             showShadow();
         } else {
-
+            dismiss();
         }
     }
 
-    public static MenuLeftFragment newInstance() {
+    public static MenuLeftFragment newInstance(String params) {
+        Bundle bundle = new Bundle();
+        bundle.putString("params", params);
         MenuLeftFragment f = new MenuLeftFragment();
+        f.setArguments(bundle);
         return f;
     }
 
     String json;
-    public MenuLeftFragment setArgument(String params) {
-        this.json = params;
-        return this;
-    }
 
     private void initParams() {
         //音轨列表
@@ -121,55 +116,74 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
         //字幕延迟时间
         //影片信息
         //画面比例
-
+        json = getArguments().getString("params");
         MenuParams params = new Gson().fromJson(json, MenuParams.class);
+        IMenu audioSubMenu = findMenuByID("audioSub");
+        MenuBean audioSubData = audioSubMenu.getData();
+        audioSubData.items.clear();
         for (MenuParams.MTrackInfo mTrackInfo : params.audioList) {
             MenuBean.MenuItemBean itemBean = new MenuBean.MenuItemBean();
             itemBean.itemType = MenuBean.MenuItemBean.ItemType.radiobutton;
             itemBean.itemName = mTrackInfo.trackName;
             itemBean.itemParams = new String[]{Constant.ACTION_AUDIO_CHANGED,
                     mTrackInfo.selected ? "true" : "false", "1"};
-            Map<String,String> itemParams = new HashMap<>();
-            itemParams.put(Constant.KEY_PARAMS_AUDIO,String.valueOf(mTrackInfo.trackIndex));
-            itemBean.itemParmasKV.add(itemParams);
+            Map<String, String> itemParams = new HashMap<>();
+            itemParams.put(Constant.KEY_PARAMS_AUDIO, String.valueOf(mTrackInfo.trackIndex));
+            itemBean.itemParamsKV.add(itemParams);
             itemBean.itemID = String.valueOf(mTrackInfo.trackIndex);
-            getAudioMenu().items.add(itemBean);
+            audioSubData.items.add(itemBean);
         }
+        audioSubMenu.setData(audioSubData);
 
 
-        for(MenuBean.MenuItemBean itemBean : getRatioMenu().items) {
-            if(itemBean.itemID.equals(params.ratio)) {
+        IMenu ratioSubMenu = findMenuByID("ratioSub");
+        MenuBean ratioSubData = ratioSubMenu.getData();
+        for (MenuBean.MenuItemBean itemBean : ratioSubData.items) {
+            Log.d(TAG, itemBean.toString());
+            if (itemBean.itemID.equals(params.ratio)) {
                 itemBean.itemParams[1] = "true";
             } else {
                 itemBean.itemParams[1] = "false";
             }
         }
+        ratioSubMenu.setData(ratioSubData);
 
-    }
+        IMenu subtitleSubMenu = findMenuByID("subtitleSub");
+        MenuBean subtitleSubData = subtitleSubMenu.getData();
+        int index=0;
+        for (MenuParams.MTrackInfo mTrackInfo : params.internalSubtitleList) {
+            MenuBean.MenuItemBean itemBean = new MenuBean.MenuItemBean();
+            itemBean.itemType = MenuBean.MenuItemBean.ItemType.radiobutton;
+            itemBean.itemName = mTrackInfo.trackName;
+            itemBean.itemParams = new String[]{Constant.ACTION_SUBTITLE_CHANGED,
+                    mTrackInfo.selected ? "true" : "false", "0"};
 
-    private MenuBean getRatioMenu() {
-        MenuBean ret = null;
-        for (MenuBean bean : data) {
-            if (bean.menuID.equals("ratioSub"))
-                ret = bean;
+            //取消无字幕
+            if (mTrackInfo.selected) {
+                subtitleSubData.items.get(0).itemParams = new String[]{Constant.ACTION_SUBTITLE_CHANGED, "false", "0"};
+            }
+
+            Map<String, String> itemParams = new HashMap<>();
+            itemParams.put(Constant.KEY_PARAMS_SUBTITLE, String.valueOf(mTrackInfo.trackIndex));
+            itemBean.itemParamsKV.add(itemParams);
+            itemBean.itemID = String.valueOf(mTrackInfo.trackIndex);
+            subtitleSubData.items.add(index+1, itemBean);
+            index++;
         }
-        return ret;
+        subtitleSubMenu.setData(subtitleSubData);
+
     }
 
-    private MenuBean getAudioMenu() {
-        MenuBean ret = null;
-        for (MenuBean bean : data) {
-            if (bean.menuID.equals("audioSub"))
-                ret = bean;
-        }
-        return ret;
-    }
+    private void updateSubtitle() {
+        MenuBean menuBean = findMenuByID("subtitleSub").getData();
+        //修改bean,加入item后
 
-    private void initDynamicMenu() {
+        findMenuByID("subtitleSub").setData(menuBean);
 
     }
 
     private void addView(ViewGroup parent) {
+        parent.removeAllViews();
         for (IMenu iMenu : menus) {
             parent.addView((MenuView) iMenu);
         }
@@ -194,21 +208,39 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
         getView().findViewById(R.id.shadow).startAnimation(alphaAnimation);
     }
 
+    private void showLeftArrow() {
+        AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
+        alphaAnimation.setDuration(400);
+        alphaAnimation.setFillAfter(true);
+        getView().findViewById(R.id.left_arrow).setVisibility(View.VISIBLE);
+        getView().findViewById(R.id.left_arrow).startAnimation(alphaAnimation);
+    }
+
+    private void hideLeftArrow() {
+        AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
+        alphaAnimation.setDuration(400);
+        alphaAnimation.setFillAfter(true);
+        getView().findViewById(R.id.left_arrow).startAnimation(alphaAnimation);
+    }
+
 
     private List<IMenu> getMenuView(List<MenuBean> data) {
         List<IMenu> list = new ArrayList<>();
         for (MenuBean menuBean : data) {
-            MenuView iMenu = new MenuView(getContext());
-            iMenu.setData(menuBean, 400, 100);
-            iMenu.setOnKeyListener(this);
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(-2, -2);
-            params.addRule(RelativeLayout.CENTER_IN_PARENT);
-            iMenu.setLayoutParams(params);
-            list.add(iMenu);
+            list.add(createMenuView(menuBean));
         }
         return list;
     }
 
+    private IMenu createMenuView(MenuBean bean) {
+        MenuView iMenu = new MenuView(getContext(), 400, 100);
+        iMenu.setData(bean);
+        iMenu.setOnKeyListener(this);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(-2, -2);
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        iMenu.setLayoutParams(params);
+        return iMenu;
+    }
 
 
 //    @Override
@@ -258,6 +290,12 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
 //                    break;
 //            }
 //        }
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_MENU) {
+                dismiss();
+                ret = true;
+            }
+        }
         return ret;
     }
 
@@ -265,33 +303,42 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
     public void onChildMenu(String childMenuID, IMenu iMenu) {
         iMenu.onBackground();
         setTile(findMenuByID(childMenuID).getData().menuName);
-        findMenuByID(childMenuID).onComeIn();
+        currentMenuView = findMenuByID(childMenuID);
+        currentMenuView.onComeIn();
+        showLeftArrow();
     }
+
+    IMenu currentMenuView;
 
     @Override
     public void onSuperMenu(IMenu iMenu) {
-        iMenu.onDismiss();
         if (iMenu.getData().menuID.equals("0")) {
-            hideShadow();
-            setTile("");
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-//                    finish();
-                    if(listener!=null) {
-                        listener.onClose();
-                    }
-                }
-            }, 400);
-
-
+            dismiss();
         } else {
-            findMenuByID(iMenu.getData().superMenuID).onComeback();
+            currentMenuView.onDismiss();
+            currentMenuView = findMenuByID(iMenu.getData().superMenuID);
+            currentMenuView.onComeback();
             setTile(findMenuByID(iMenu.getData().superMenuID).getData().menuName);
+            if (currentMenuView.getData().menuID.equals("0")) {
+                hideLeftArrow();
+            }
         }
     }
 
-
+    private void dismiss() {
+        currentMenuView.onDismiss();
+        hideShadow();
+        setTile("");
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                    finish();
+                if (listener != null) {
+                    listener.onClose();
+                }
+            }
+        }, 400);
+    }
 
 
     IMenu findMenuByID(String id) {
@@ -337,6 +384,7 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
 
     public interface MenuEventListener {
         void onClose();
+
         void onShow();
     }
 }
