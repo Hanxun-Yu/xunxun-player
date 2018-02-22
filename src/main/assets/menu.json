@@ -28,7 +28,7 @@
         "itemID":"info",
         "itemName": "影片信息",
         "itemType": "activity",
-        "itemParams": ["package","activity"],
+        "itemParams": ["action"],
         "itemIcon":""
       }
     ]
@@ -57,7 +57,7 @@
         "itemID":"subtitle_adjust",
         "itemName": "校准时间轴",
         "itemType": "activity",
-        "itemParams": ["package","activity"]
+        "itemParams": ["action"]
       }
     ]
   },

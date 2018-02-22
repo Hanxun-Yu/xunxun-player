@@ -8,13 +8,13 @@
 
     <!-- The main content view -->
 
-    <org.crashxun.player.widget.media.XunVideoView
+    <org.crashxun.player.xunxun.XunVideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center">
 
-    </org.crashxun.player.widget.media.XunVideoView>
+    </org.crashxun.player.xunxun.XunVideoView>
 
     <TextView
         android:id="@+id/toast_text_view"

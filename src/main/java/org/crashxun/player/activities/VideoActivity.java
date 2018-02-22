@@ -17,21 +17,16 @@ package org.crashxun.player.activities;
 
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.TableLayout;
@@ -40,16 +35,10 @@ import android.widget.TextView;
 import org.crashxun.player.R;
 import org.crashxun.player.application.Settings;
 import org.crashxun.player.fragments.TracksFragment;
-import org.crashxun.player.widget.media.AndroidMediaController;
-import org.crashxun.player.widget.media.IMediaController;
-import org.crashxun.player.widget.media.XunVideoView;
+import org.crashxun.player.xunxun.XunVideoView;
 import org.crashxun.player.widget.media.MeasureHelper;
-import org.crashxun.player.widget.xunxun.MiPlayController;
-import org.crashxun.player.widget.xunxun.api.IPlayController;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import org.crashxun.player.xunxun.MiPlayController;
+import org.crashxun.player.xunxun.api.IPlayController;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;

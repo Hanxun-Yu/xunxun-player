@@ -44,13 +44,22 @@
 
                 <data android:mimeType="video/*" />
             </intent-filter>
+
+        </activity>
+
+        <activity android:name=".xunxun.activity.XunxunMainActivity"
+            android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
+        <activity android:name=".xunxun.svg.MainActivity" >
+
+        </activity>
         <!--<activity android:name=".widget.xunxun.activity.TestActivity">-->
 
         <!--</activity>-->
