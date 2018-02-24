@@ -12,11 +12,15 @@
         android:background="@drawable/status_mask_top"
         android:layout_height="300px">
 
-        <TextView
+        <org.crashxun.player.widget.MarqueeTextView
             android:id="@+id/titleText"
             android:layout_marginLeft="40px"
             android:padding="40px"
             android:textSize="50px"
+            android:maxWidth="1280px"
+            android:singleLine="true"
+            android:marqueeRepeatLimit="-1"
+            android:ellipsize="marquee"
             android:textColor="@color/ijk_color_blue_50"
             android:text="Title"
             android:alpha="0.6"

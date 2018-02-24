@@ -5,12 +5,16 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.util.Log;
 
+import org.crashxun.player.xunxun.service.PlayFileService;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import jcifs.UniAddress;
 import jcifs.smb.NtlmPasswordAuthentication;
@@ -108,11 +112,23 @@ public class SmbFileUtils {
         listSmbFiles(path, getAuthentication(username, password), smbListFilesListener);
     }
 
+    ExecutorService executors = Executors.newCachedThreadPool();
+
+    public void listSmbFilesForAndroid(final String path, final String username, final String password, final SmbListFilesListener smbListFilesListener) {
+        executors.execute(new Runnable() {
+            @Override
+            public void run() {
+                listSmbFiles(path, username, password, smbListFilesListener);
+            }
+        });
+    }
+
+
     private void listSmbFiles(final String path, NtlmPasswordAuthentication mAuthentication, final SmbListFilesListener smbListFilesListener) {
         Log.d(TAG, "listSmbFiles path:" + path);
-        String rootPath = null;
+        String rootPath = path;
         if (path.lastIndexOf("smb://") != 0) {
-            rootPath = "smb://" + path;
+            rootPath = "smb://" + rootPath;
         }
         if (!path.endsWith("/")) {
             rootPath += "/";
@@ -135,10 +151,17 @@ public class SmbFileUtils {
                 authMap.put(path, mAuthentication);
                 saveFoldAuthInfo(new FoldAuthInfo(path, mAuthentication.getUsername(), mAuthentication.getPassword()));
                 curAuthentication = mAuthentication;
+                PlayFileService.setAuth(curAuthentication);
             }
-
-            if (smbListFilesListener != null)
-                smbListFilesListener.onSuccess(files);
+            final SmbFile[] finalFiles = files;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    //无授权记录
+                    if (smbListFilesListener != null)
+                        smbListFilesListener.onSuccess(finalFiles);
+                }
+            });
 
             for (SmbFile file : files) {
 //                Log.e(TAG, "getCanonicalPath:" + file.getCanonicalPath());

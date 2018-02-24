@@ -1,6 +1,10 @@
 package org.crashxun.player.xunxun.activity;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,10 +25,18 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import org.crashxun.player.R;
+import org.crashxun.player.activities.VideoActivity;
 import org.crashxun.player.xunxun.fragment.FileBrowerFragment;
 import org.crashxun.player.xunxun.fragment.MenuLeftFragment;
+import org.crashxun.player.xunxun.service.PlayFileService;
 import org.crashxun.player.xunxun.svg.AnimatedSvgView;
 import org.crashxun.player.xunxun.svg.GAStudioPath2;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import static org.crashxun.player.xunxun.common.Constant.ACTION_MAIN_FILEBROWER_FILESELECTED;
+import static org.crashxun.player.xunxun.common.Constant.KEY_PARAMS_ACTIVITY;
 
 /**
  * Created by xunxun on 2018/2/22.
@@ -46,7 +58,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
         bgImg = findViewById(R.id.bg_img);
         bgImg.setVisibility(View.INVISIBLE);
 //        bindListener(this);
-        f = FileBrowerFragment.newInstance();
+        f = FileBrowerFragment.newInstance(ACTION_MAIN_FILEBROWER_FILESELECTED);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.brower, f);
         transaction.commit();
@@ -117,7 +129,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
                 if (state == AnimatedSvgView.STATE_FINISHED) {
                     TranslateAnimation animation = new TranslateAnimation(0,300,0,0);
                     animation.setInterpolator(new DecelerateInterpolator());
-                    animation.setDuration(1000);
+                    animation.setDuration(1500);
 //                    animation.setFillAfter(true);
                     animation.setAnimationListener(new Animation.AnimationListener() {
                         @Override
@@ -172,6 +184,10 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
                 }
             }
         });
+        registReceiver();
+
+        Intent intent = new Intent(this,PlayFileService.class);
+        startService(intent);
     }
 
     private void animateLogo() {
@@ -224,4 +240,39 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
 //        alphaAnimation.setFillAfter(true);
 //        findViewById(R.id.bg_img).startAnimation(alphaAnimation);
 //    }
+
+    BroadcastReceiver fileSelectReceiver;
+
+    void registReceiver() {
+        if(fileSelectReceiver == null) {
+            fileSelectReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if(intent.getAction().equals(ACTION_MAIN_FILEBROWER_FILESELECTED)) {
+                       String path = intent.getStringExtra(KEY_PARAMS_ACTIVITY);
+
+                       String name = path;
+                        try {
+                            path  = URLEncoder.encode(path,"utf-8");
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                        play("http://"+PlayFileService.IP+":"+PlayFileService.PORT+"/"+path,name);
+                    }
+                }
+            };
+
+            IntentFilter intentFilter = new IntentFilter(ACTION_MAIN_FILEBROWER_FILESELECTED);
+            registerReceiver(fileSelectReceiver,intentFilter);
+        }
+    }
+
+
+    private void play(String path,String name) {
+        Intent intentPlayer = new Intent(this, VideoActivity.class);
+        intentPlayer.putExtra("videoPath",path);
+        intentPlayer.putExtra("videoName",name);
+        startActivity(intentPlayer);
+    }
+
 }

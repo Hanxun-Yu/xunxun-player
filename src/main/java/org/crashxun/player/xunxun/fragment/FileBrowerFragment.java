@@ -18,10 +18,14 @@ import org.crashxun.player.R;
 import org.crashxun.player.xunxun.menu.FileBrowerView;
 import org.crashxun.player.xunxun.menu.IMenu;
 import org.crashxun.player.xunxun.menu.MenuBean;
+import org.crashxun.player.xunxun.samba.SmbFileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
 
 /**
  * Created by xunxun on 2018/2/12.
@@ -59,8 +63,11 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
     }
 
 
+    String onFileSelectedAction;
+
     private void create() {
         //        if (data == null) {
+        onFileSelectedAction = getArguments().getString("params");
         MenuBean rootMenu = new MenuBean();
         rootMenu.menuID = "0";
         rootMenu.menuName = "root";
@@ -75,6 +82,14 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         sdcard.itemParams = new String[]{sdcardPath};
         rootMenu.items.add(sdcard);
 
+        MenuBean.MenuItemBean sambaItem = new MenuBean.MenuItemBean();
+        sambaItem.itemIcon = String.valueOf(R.drawable.fold_60_60);
+        sambaItem.itemName = "10.1.1.200";
+        sambaItem.itemID = "smb://10.1.1.200";
+        sambaItem.itemType = MenuBean.MenuItemBean.ItemType.menu;
+        sambaItem.itemParams = new String[]{"smb://10.1.1.200"};
+        rootMenu.items.add(sambaItem);
+        smbFileUtils = new SmbFileUtils(getContext(), "10.1.1.200");
 
         menus.add(createMenuView(rootMenu));
 
@@ -187,9 +202,10 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
     }
 
     String handlingMenuID = null;
+
     @Override
     public void onChildMenu(String childMenuID, final IMenu iMenu) {
-        if(!childMenuID.equals(handlingMenuID)) {
+        if (!childMenuID.equals(handlingMenuID)) {
             handlingMenuID = childMenuID;
         } else {
             return;
@@ -221,7 +237,7 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
 
     @Override
     public void onSuperMenu(final IMenu iMenu) {
-        if(!iMenu.getData().superMenuID.equals(handlingMenuID)) {
+        if (!iMenu.getData().superMenuID.equals(handlingMenuID)) {
             handlingMenuID = iMenu.getData().superMenuID;
         } else {
             return;
@@ -244,15 +260,48 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
     }
 
 
-    private void createMenuBean(String name, String superID, String mID, CreateMenuListener createMenuListener) {
+    SmbFileUtils smbFileUtils;
+
+    private void createMenuBean(String name, String superID, String mID, final CreateMenuListener createMenuListener) {
         Log.d(TAG, "createMenuBean name:" + name + " superID:" + superID + " mID:" + mID);
-        MenuBean ret = new MenuBean();
+        final MenuBean ret = new MenuBean();
         ret.menuName = name;
         ret.menuID = mID;
         ret.superMenuID = superID;
 
 
         if (mID.startsWith("smb://")) {
+            smbFileUtils.listSmbFilesForAndroid(mID, "tv", "mmmmmm", new SmbFileUtils.SmbListFilesListener() {
+                @Override
+                public void onSuccess(SmbFile[] smbFiles) {
+                    MenuBean.MenuItemBean itemBean;
+                    for (SmbFile file : smbFiles) {
+                        itemBean = new MenuBean.MenuItemBean();
+                        try {
+                            itemBean.itemIcon = file.isFile() ? String.valueOf(R.drawable.file_60_60) : String.valueOf(R.drawable.fold_60_60);
+                            itemBean.itemType = file.isFile() ? MenuBean.MenuItemBean.ItemType.activity : MenuBean.MenuItemBean.ItemType.menu;
+                            itemBean.itemID = file.getPath();
+                            itemBean.itemName = file.getName();
+                            itemBean.itemParams = file.isFile() ? new String[]{onFileSelectedAction,file.getPath()} : new String[]{file.getPath()};
+                        } catch (SmbException e) {
+                            e.printStackTrace();
+                        }
+                        ret.items.add(itemBean);
+                    }
+                    createMenuListener.onCreated(ret);
+
+                }
+
+                @Override
+                public void onAuthFailed(String path) {
+
+                }
+
+                @Override
+                public void onHostUnconnected(String path) {
+
+                }
+            });
 
         } else {
             File parent = new File(mID);
@@ -264,11 +313,11 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
                 itemBean.itemType = file.isFile() ? MenuBean.MenuItemBean.ItemType.activity : MenuBean.MenuItemBean.ItemType.menu;
                 itemBean.itemID = file.getAbsolutePath();
                 itemBean.itemName = file.getName();
-                itemBean.itemParams = file.isFile() ? new String[]{"action"} : new String[]{file.getAbsolutePath()};
+                itemBean.itemParams = file.isFile() ? new String[]{onFileSelectedAction,file.getAbsolutePath()} : new String[]{file.getAbsolutePath()};
                 ret.items.add(itemBean);
             }
+            createMenuListener.onCreated(ret);
         }
-        createMenuListener.onCreated(ret);
     }
 
     interface CreateMenuListener {

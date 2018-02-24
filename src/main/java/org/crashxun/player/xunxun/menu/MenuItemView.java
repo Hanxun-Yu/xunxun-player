@@ -1,6 +1,9 @@
 package org.crashxun.player.xunxun.menu;
 
 import android.content.Context;
+import android.graphics.Rect;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -8,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.crashxun.player.R;
+import org.crashxun.player.widget.MarqueeTextView;
 
 /**
  * Created by xunxun on 2018/2/13.
@@ -21,7 +25,7 @@ public abstract class MenuItemView extends LinearLayout {
 
     ImageView leftIcon;
     ImageView rightIcon;
-    TextView textView;
+    MarqueeTextView textView;
     LayoutInflater inflater;
 
     MenuBean.MenuItemBean.ItemType type;
@@ -36,6 +40,18 @@ public abstract class MenuItemView extends LinearLayout {
         LinearLayout.LayoutParams ll = new LayoutParams(-1,-1);
 
         addView(root,ll);
+    }
+
+
+    @Override
+    protected void onFocusChanged(boolean gainFocus, int direction, @Nullable Rect previouslyFocusedRect) {
+        if(gainFocus) {
+            textView.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+            textView.setMarqueeRepeatLimit(-1);
+        } else {
+            textView.setEllipsize(TextUtils.TruncateAt.END);
+        }
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
     }
 
     public void setType(MenuBean.MenuItemBean.ItemType type) {

@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -44,7 +45,7 @@ import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
-public class VideoActivity extends AppCompatActivity implements TracksFragment.ITrackHolder {
+public class VideoActivity extends FragmentActivity implements TracksFragment.ITrackHolder {
     private static final String TAG = "VideoActivity";
 
     private String mVideoPath;
@@ -86,8 +87,8 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 //        mVideoPath = "http://10.1.1.201/bmq10m.mp4";
 //        mVideoPath = "http://video.venjean.cn/sv/589e162b-1601585d5d7/589e162b-1601585d5d7.mp4";
 //        mVideoPath = "http://192.168.199.205/vod/movie/No.Escape.2015.1080p.BluRay.x264-DRONES[rarbg]/No.Escape.2015.1080p.BluRay.x264-DRONES.mkv";
-        mVideoPath = "http://10.1.1.201/Blade.Runner.2049.2017.BD1080P.X264.DTS-HD.MA.7.1.Mandarin&English.CHS-ENG.Mp4BaFans.mkv";
-        mVideoPath = "http://10.1.1.201/The.Bourne.Supremacy.2004.1080p.BluRay.DTS.x264.D-Z0N3.mkv";
+//        mVideoPath = "http://10.1.1.201/Blade.Runner.2049.2017.BD1080P.X264.DTS-HD.MA.7.1.Mandarin&English.CHS-ENG.Mp4BaFans.mkv";
+//        mVideoPath = "http://10.1.1.201/The.Bourne.Supremacy.2004.1080p.BluRay.DTS.x264.D-Z0N3.mkv";
         mVideoPath = "http://10.1.1.201/Oblivion (2013) x264 1080p DD5.1+DTS (Nl subs) SAM TBS.mkv";
 //        try {
 //            mVideoPath = URLEncoder.encode(mVideoPath,"utf-8");

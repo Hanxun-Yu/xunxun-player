@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import org.crashxun.player.R;
 import org.crashxun.player.xunxun.ViewIDUtil;
+import org.crashxun.player.xunxun.common.Constant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -203,6 +204,7 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
                     @Override
                     public void onFocusChange(View v, boolean hasFocus) {
                         Log.d(TAG, "btn:" + finalBtn.getText() + " focus:" + hasFocus);
+
                         finalBtn.onFocus(hasFocus);
                         if (hasFocus) {
                             unFocusDrawable = v.getBackground();
@@ -223,6 +225,7 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
                     public void onClick(View v) {
                         switch (item.itemType) {
                             case activity:
+                                sendBroadcastActivity(item);
                                 break;
                             case menu:
                                 lastFocus = v;
@@ -331,6 +334,14 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
 
     }
 
+    private void sendBroadcastActivity(MenuBean.MenuItemBean itemBean) {
+        Intent intent = new Intent(itemBean.itemParams[0]);
+        intent.putExtra(Constant.KEY_PARAMS_ACTIVITY,itemBean.itemParams[1]);
+//        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+        getContext().sendBroadcast(intent);
+        Log.d(TAG, "sendBroadcast intent:" + intent);
+    }
+
     private void sendBroadcast(MenuBean.MenuItemBean itemBean) {
         Intent intent = new Intent(itemBean.itemParams[0]);
 
@@ -358,15 +369,18 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     private void onFocus(final View v, final boolean focus) {
         Log.d(TAG, "onFocus v:" + ((MenuItemView) v).getText() + " focus:" + focus);
-        int animID = focus ? R.anim.menu_btn_focus : R.anim.menu_btn_unfocus;
-        Interpolator interpolator = focus ? new OvershootInterpolator(6) : new DecelerateInterpolator();
-        final Animation scaleAnimation = AnimationUtils.loadAnimation(getContext(), animID);
-        scaleAnimation.setInterpolator(interpolator);
-        scaleAnimation.setFillAfter(focus);
-        if (focus)
-            v.bringToFront();
+        if(v.getTag()==null || !v.getTag().equals(focus)) {
+            int animID = focus ? R.anim.menu_btn_focus : R.anim.menu_btn_unfocus;
+            Interpolator interpolator = focus ? new OvershootInterpolator(6) : new DecelerateInterpolator();
+            final Animation scaleAnimation = AnimationUtils.loadAnimation(getContext(), animID);
+            scaleAnimation.setInterpolator(interpolator);
+            scaleAnimation.setFillAfter(focus);
+            if (focus)
+                v.bringToFront();
 
-        v.startAnimation(scaleAnimation);
+            v.startAnimation(scaleAnimation);
+            v.setTag(focus);
+        }
     }
 
     @Override
@@ -452,7 +466,6 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
             public void onAnimationEnd(Animation animation) {
                     if (lastFocus != null) {
                         lastFocus.requestFocus();
-                        lastFocus = null;
                     }
             }
 

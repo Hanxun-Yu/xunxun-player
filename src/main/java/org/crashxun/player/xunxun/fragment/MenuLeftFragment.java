@@ -53,6 +53,7 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
         menuLayout = rootView.findViewById(R.id.menuLayout);
         titleText = rootView.findViewById(R.id.title);
         titleText.setText("");
+        rootView.findViewById(R.id.shadow).setVisibility(View.INVISIBLE);
         return rootView;
     }
 
@@ -213,6 +214,7 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
         AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
         alphaAnimation.setDuration(400);
         alphaAnimation.setFillAfter(true);
+        getView().findViewById(R.id.shadow).setVisibility(View.VISIBLE);
         getView().findViewById(R.id.shadow).startAnimation(alphaAnimation);
     }
 
@@ -399,7 +401,6 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
 
     public interface MenuEventListener {
         void onClose();
-
         void onShow();
     }
 }

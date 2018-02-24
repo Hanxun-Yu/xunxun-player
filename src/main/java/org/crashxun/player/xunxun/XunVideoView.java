@@ -802,6 +802,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                 keyCode != KeyEvent.KEYCODE_VOLUME_MUTE &&
                 keyCode != KeyEvent.KEYCODE_MENU &&
                 keyCode != KeyEvent.KEYCODE_CALL &&
+                keyCode != KeyEvent.KEYCODE_ESCAPE &&
                 keyCode != KeyEvent.KEYCODE_ENDCALL;
         if (isInPlaybackState() && isKeyCodeSupported && mMediaController != null) {
             return mMediaController.handlerEvent(event);
@@ -809,6 +810,8 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 
         return super.onKeyDown(keyCode, event);
     }
+
+
 
     MenuParams mMenuParams;
 
@@ -844,6 +847,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         Log.d(TAG, "act onKeyUp keycode=" + keyCode);
         boolean isKeyCodeSupported = keyCode != KeyEvent.KEYCODE_BACK &&
+                keyCode != KeyEvent.KEYCODE_ESCAPE &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_UP &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_DOWN &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_MUTE &&

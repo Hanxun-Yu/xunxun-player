@@ -17,17 +17,15 @@
     <!--android:theme="@style/noAnimation"-->
     <application
         android:allowBackup="true"
-        android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-         >
+        android:largeHeap="true"
+        android:theme="@style/AppTheme">
         <activity
             android:name=".activities.VideoActivity"
-            android:hardwareAccelerated="true"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize"
             android:label="@string/app_name"
-            android:screenOrientation="user"
+            android:screenOrientation="landscape"
             android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -47,33 +45,41 @@
 
         </activity>
 
-        <activity android:name=".xunxun.activity.XunxunMainActivity"
+        <activity
+            android:name=".xunxun.activity.XunxunMainActivity"
+            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize"
+            android:screenOrientation="landscape"
             android:theme="@style/FullscreenTheme">
+
+
+        </activity>
+
+        <activity android:name=".xunxun.svg.MainActivity">
+
+        </activity>
+
+        <activity android:name=".xunxun.keyboard.KeyboardTestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-        </activity>
-
-        <activity android:name=".xunxun.svg.MainActivity" >
-
         </activity>
         <!--<activity android:name=".widget.xunxun.activity.TestActivity">-->
 
         <!--</activity>-->
 
         <!--<activity android:name=".widget.xunxun.activity.MenuLeftActivity"-->
-            <!--android:theme="@style/LeftMenu" />-->
+        <!--android:theme="@style/LeftMenu" />-->
 
         <service
             android:name=".services.MediaPlayerService"
             android:enabled="false"
             android:exported="false"
             android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name" >
-        </service>
+            android:label="@string/app_name"></service>
+
+        <service android:name=".xunxun.service.PlayFileService" />
     </application>
 
 </manifest>

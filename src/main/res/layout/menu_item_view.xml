@@ -17,9 +17,11 @@
         android:src="@drawable/radiobutton_selected"
         />
 
-    <TextView
+    <org.crashxun.player.widget.MarqueeTextView
         android:id="@+id/text"
         android:layout_weight="1"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:text="text"
         android:textSize="40px"
         android:paddingLeft="20px"
