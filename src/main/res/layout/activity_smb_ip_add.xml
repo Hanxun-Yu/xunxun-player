@@ -17,11 +17,11 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/username"
+            android:id="@+id/ip"
             android:focusable="true"
-            android:hint="username"
             android:background="@drawable/login_edit_selector"
             android:paddingTop="5px"
+            android:hint="ip"
             android:paddingBottom="5px"
             android:paddingLeft="20px"
             android:textColor="@color/menu_color"
@@ -30,21 +30,7 @@
             android:layout_width="400px"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/password"
-            android:focusable="true"
-            android:layout_marginTop="20px"
-            android:hint="password"
-            android:inputType="textPassword"
-            android:background="@drawable/login_edit_selector"
-            android:paddingTop="5px"
-            android:paddingBottom="5px"
-            android:paddingLeft="20px"
-            android:textColor="@color/menu_color"
-            android:textSize="30px"
-            android:textColorHint="@color/login_text_color_hint"
-            android:layout_width="400px"
-            android:layout_height="wrap_content" />
+
 
 
         <LinearLayout

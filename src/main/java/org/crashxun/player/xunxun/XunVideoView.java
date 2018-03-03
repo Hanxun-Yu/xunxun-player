@@ -16,6 +16,7 @@ package org.crashxun.player.xunxun;/*
 
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,7 +31,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -1000,6 +1000,10 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                         Log.d(TAG, "menuEventReceiver----selectedSubtitleTrack:" + selectedSubtitleTrack);
 
                         break;
+
+                    case Constant.ACTION_MEDIAINFO:
+                        showMediaInfo();
+                        break;
                 }
             }
         };
@@ -1010,6 +1014,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         intentFilter.addAction(Constant.ACTION_RATIO_CHANGED);
         intentFilter.addAction(Constant.ACTION_SUBTITLE_CHANGED);
         intentFilter.addAction(Constant.ACTION_SUBTITLE_TIME_ADJUST);
+        intentFilter.addAction(Constant.ACTION_MEDIAINFO);
 
 //        LocalBroadcastManager.getInstance(getContext()).registerReceiver(menuEventReceiver,intentFilter);
         getContext().registerReceiver(menuEventReceiver, intentFilter);
@@ -1467,7 +1472,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
             }
         }
 
-        AlertDialog.Builder adBuilder = builder.buildAlertDialogBuilder();
+        android.support.v7.app.AlertDialog.Builder adBuilder = builder.buildAlertDialogBuilder();
         adBuilder.setTitle(R.string.media_information);
         adBuilder.setNegativeButton(R.string.close, null);
         adBuilder.show();

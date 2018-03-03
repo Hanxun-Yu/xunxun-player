@@ -35,6 +35,9 @@ public class KeyboardFragment extends Fragment {
         return rootView;
     }
 
+    public void setInputType(int type) {
+        keyBoardView.setInputType(type);
+    }
     public void setInitText(String text) {
         keyBoardView.setInitText(text);
     }
@@ -63,11 +66,15 @@ public class KeyboardFragment extends Fragment {
             @Override
             public void onClose() {
                 setUserVisibleHint(false);
+                if(keyboardEventListener != null)
+                    keyboardEventListener.onCancel();
             }
 
             @Override
             public void onConfirm(String text) {
                 setUserVisibleHint(false);
+                if(keyboardEventListener != null)
+                    keyboardEventListener.onConfirm(text);
             }
 
             @Override
@@ -121,6 +128,7 @@ public class KeyboardFragment extends Fragment {
     public interface KeyboardEventListener {
         void onClose();
         void onShow();
+        void onCancel();
+        void onConfirm(String text);
     }
-
 }

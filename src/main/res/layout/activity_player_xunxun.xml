@@ -28,29 +28,28 @@
         android:visibility="gone" />
 
     <!--<TableLayout-->
-    <!--android:id="@+id/hud_view"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_gravity="right|center_vertical"-->
-    <!--android:background="@color/ijk_transparent_dark"-->
-    <!--android:padding="8dp" />-->
+        <!--android:id="@+id/hud_view"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="right|center_vertical"-->
+        <!--android:background="@color/ijk_transparent_dark"-->
+        <!--android:padding="8dp" />-->
 
     <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:background="@color/ijk_transparent_dark"-->
-        <!--android:minHeight="?attr/actionBarSize"-->
-        <!--android:theme="@style/ThemeOverlay.AppCompat.ActionBar"-->
-        <!--android:visibility="invisible"-->
-        <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
-        <!--tools:context=".toolbar_widget" />-->
+    <!--android:id="@+id/toolbar"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:background="@color/ijk_transparent_dark"-->
+    <!--android:minHeight="?attr/actionBarSize"-->
+    <!--android:theme="@style/ThemeOverlay.AppCompat.ActionBar"-->
+    <!--android:visibility="invisible"-->
+    <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
+    <!--tools:context=".toolbar_widget" />-->
 
     <!-- The navigation drawer -->
     <FrameLayout
         android:id="@+id/right_drawer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
-        />
+        android:layout_gravity="left" />
 </RelativeLayout>

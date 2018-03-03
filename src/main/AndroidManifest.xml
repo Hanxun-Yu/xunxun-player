@@ -26,7 +26,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -51,19 +51,23 @@
             android:screenOrientation="landscape"
             android:theme="@style/FullscreenTheme">
 
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <activity android:name=".xunxun.svg.MainActivity">
 
         </activity>
 
-        <activity android:name=".xunxun.keyboard.KeyboardTestActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <activity android:name=".xunxun.activity.LoginActivity"
+            android:theme="@style/login" >
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+        </activity>
+        <activity android:name=".xunxun.activity.SMBServerAddActivity"
+            android:theme="@style/login" >
         </activity>
         <!--<activity android:name=".widget.xunxun.activity.TestActivity">-->
 

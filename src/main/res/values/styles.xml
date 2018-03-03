@@ -6,7 +6,6 @@
 
     <style name="Theme.App.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
-
         <item name="actionButtonStyle">@style/Widget.App.ActionButton</item>
     </style>
 
@@ -18,12 +17,34 @@
     </style>
 
 
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+
     <!--mce_bogus="1"-->
     <!--<style name="LeftMenuAnim"  parent="android:Animation">-->
         <!--<item name="android:windowEnterAnimation">@aleft_menu_comeinu_in</item>-->
         <!--<item name="android:windowExitAnimation">@aleft_menu_dismiss_out</item>-->
     <!--</style>-->
-    <style name="LeftMenu">
+
+    <style name="login" parent="LeftMenu" >
+
+    </style>
+
+
+    <style name="loginAnim" parent="@android:style/Animation.Activity" >
+        <item name="android:activityOpenEnterAnimation">@anim/keyboard_comein</item>
+        <item name="android:activityOpenExitAnimation">@anim/keyboard_comeout</item>
+        <item name="android:activityCloseEnterAnimation">@anim/keyboard_comein</item>
+        <item name="android:activityCloseExitAnimation">@anim/keyboard_comeout</item>
+    </style>
+
+
+    <style name="LeftMenu" parent="android:Theme.Holo.NoActionBar.Fullscreen">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowNoTitle">true</item>

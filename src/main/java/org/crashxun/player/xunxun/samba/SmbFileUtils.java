@@ -82,7 +82,7 @@ public class SmbFileUtils {
 
 
     private NtlmPasswordAuthentication getAuthentication(String username, String password) {
-        Log.d(TAG, "getAuthentication");
+        Log.d(TAG, "getAuthentication ip:"+IP+" username:"+username+" password:"+password);
 
         NtlmPasswordAuthentication mAuthentication = new NtlmPasswordAuthentication(IP, username, password);
         try {
@@ -119,6 +119,15 @@ public class SmbFileUtils {
             @Override
             public void run() {
                 listSmbFiles(path, username, password, smbListFilesListener);
+            }
+        });
+    }
+
+    public void listSmbFilesForAndroid(final String path,final SmbListFilesListener smbListFilesListener) {
+        executors.execute(new Runnable() {
+            @Override
+            public void run() {
+                listSmbFiles(path,smbListFilesListener);
             }
         });
     }
@@ -185,6 +194,11 @@ public class SmbFileUtils {
             e.printStackTrace();
             Log.e(TAG, "无权限");
             Log.e(TAG, "SmbAuthException:" + e.getMessage());
+            if(mAuthentication != null) {
+                Log.e(TAG, "mAuthentication domain:" + mAuthentication.getDomain());
+                Log.e(TAG, "mAuthentication username:" + mAuthentication.getUsername());
+                Log.e(TAG, "mAuthentication password:" + mAuthentication.getPassword());
+            }
 
             if (mAuthentication == null) {
                 //尝试已缓存的授权
@@ -194,15 +208,16 @@ public class SmbFileUtils {
                     FoldAuthInfo foldAuthInfo = getFoldAuthInfo(path);
                     if (foldAuthInfo != null) {
                         listSmbFiles(path, getAuthentication(foldAuthInfo.username, foldAuthInfo.password), smbListFilesListener);
+                    } else {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                //无授权记录
+                                if (smbListFilesListener != null)
+                                    smbListFilesListener.onAuthFailed(path);
+                            }
+                        });
                     }
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            //无授权记录
-                            if (smbListFilesListener != null)
-                                smbListFilesListener.onAuthFailed(path);
-                        }
-                    });
                 }
             } else {
                 handler.post(new Runnable() {

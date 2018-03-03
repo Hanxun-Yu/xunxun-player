@@ -1,5 +1,10 @@
 package org.crashxun.player.xunxun.fragment;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -13,16 +18,25 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.crashxun.player.R;
+import org.crashxun.player.xunxun.activity.LoginActivity;
+import org.crashxun.player.xunxun.activity.SMBServerAddActivity;
+import org.crashxun.player.xunxun.activity.XunxunMainActivity;
+import org.crashxun.player.xunxun.common.Constant;
 import org.crashxun.player.xunxun.menu.FileBrowerView;
 import org.crashxun.player.xunxun.menu.IMenu;
 import org.crashxun.player.xunxun.menu.MenuBean;
 import org.crashxun.player.xunxun.samba.SmbFileUtils;
+import org.w3c.dom.ls.LSException;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
@@ -40,6 +54,9 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
     TextView titleText;
     View rootView;
     IMenu currentMenuView;
+
+    Map<String, SmbFileUtils> smbUtils = new HashMap<>();
+    KeyEventDispatcher dispatcher;
 
     @Nullable
     @Override
@@ -59,7 +76,11 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        registReceiver();
         create();
+
+        if (getActivity() instanceof KeyEventDispatcher)
+            dispatcher = (KeyEventDispatcher) getActivity();
     }
 
 
@@ -82,14 +103,36 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         sdcard.itemParams = new String[]{sdcardPath};
         rootMenu.items.add(sdcard);
 
+
+        //查询已存储smb服务器列表加入菜单
+        MenuBean.MenuItemBean smb10_1_1_200 = new MenuBean.MenuItemBean();
+        smb10_1_1_200.itemIcon = String.valueOf(R.drawable.fold_60_60);
+        smb10_1_1_200.itemName = "10.1.1.200";
+        smb10_1_1_200.itemID = "smb://10.1.1.200";
+        smb10_1_1_200.itemType = MenuBean.MenuItemBean.ItemType.menu;
+        smb10_1_1_200.itemParams = new String[]{"smb://10.1.1.200"};
+        rootMenu.items.add(smb10_1_1_200);
+        addSmbUtils("10.1.1.200");
+
+        MenuBean.MenuItemBean smb10_1_1_201 = new MenuBean.MenuItemBean();
+        smb10_1_1_201.itemIcon = String.valueOf(R.drawable.fold_60_60);
+        smb10_1_1_201.itemName = "10.1.1.201";
+        smb10_1_1_201.itemID = "smb://10.1.1.201";
+        smb10_1_1_201.itemType = MenuBean.MenuItemBean.ItemType.menu;
+        smb10_1_1_201.itemParams = new String[]{"smb://10.1.1.201"};
+        rootMenu.items.add(smb10_1_1_201);
+        addSmbUtils("10.1.1.201");
+
+        //
+
         MenuBean.MenuItemBean sambaItem = new MenuBean.MenuItemBean();
         sambaItem.itemIcon = String.valueOf(R.drawable.fold_60_60);
-        sambaItem.itemName = "10.1.1.200";
-        sambaItem.itemID = "smb://10.1.1.200";
-        sambaItem.itemType = MenuBean.MenuItemBean.ItemType.menu;
-        sambaItem.itemParams = new String[]{"smb://10.1.1.200"};
+        sambaItem.itemName = "新连接";
+        sambaItem.itemID = "新连接";
+        sambaItem.itemType = MenuBean.MenuItemBean.ItemType.activity;
+        sambaItem.itemParams = new String[]{Constant.ACTION_SMB_ADD_IP_ACT};
         rootMenu.items.add(sambaItem);
-        smbFileUtils = new SmbFileUtils(getContext(), "10.1.1.200");
+
 
         menus.add(createMenuView(rootMenu));
 
@@ -99,6 +142,85 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         for (IMenu menuView : menus) {
             addMenuView((FileBrowerView) menuView);
         }
+    }
+
+    BroadcastReceiver receiver;
+
+    void registReceiver() {
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                switch (intent.getAction()) {
+                    case Constant.ACTION_LOGIN_ACT:
+                        Intent intent1 = new Intent(getContext(), LoginActivity.class);
+                        startActivityForResult(intent1, LoginActivity.RQUEST);
+                        break;
+                    case Constant.ACTION_SMB_ADD_IP_ACT:
+                        Intent intent2 = new Intent(getContext(), SMBServerAddActivity.class);
+                        startActivityForResult(intent2, SMBServerAddActivity.RQUEST);
+                        break;
+                }
+            }
+        };
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constant.ACTION_LOGIN_ACT);
+        intentFilter.addAction(Constant.ACTION_SMB_ADD_IP_ACT);
+        getContext().registerReceiver(receiver, intentFilter);
+    }
+
+    private void addSmbUtils(String ip) {
+        SmbFileUtils smbFileUtils = new SmbFileUtils(getContext(), ip);
+        smbUtils.put(ip, smbFileUtils);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case SMBServerAddActivity.RQUEST:
+                    String ip = data.getStringExtra(SMBServerAddActivity.RESULT_DATA_KEY_IP);
+                    onUpdateServerList(ip);
+                    addSmbUtils(ip);
+                    break;
+                case LoginActivity.RQUEST:
+                    username = data.getStringExtra(LoginActivity.RESULT_DATA_KEY_USERNAME);
+                    password = data.getStringExtra(LoginActivity.RESULT_DATA_KEY_PASSWORD);
+                    needUserPass = true;
+                    onChildMenu(retryMenuID, currentMenuView);
+                    break;
+            }
+        }
+    }
+
+    private boolean needUserPass = false;
+    private String username = null;
+    private String password = null;
+
+    private void onUpdateServerList(String ip) {
+        MenuBean.MenuItemBean sambaItem = new MenuBean.MenuItemBean();
+        sambaItem.itemIcon = String.valueOf(R.drawable.fold_60_60);
+        sambaItem.itemName = ip;
+        sambaItem.itemID = "smb://" + ip;
+        sambaItem.itemType = MenuBean.MenuItemBean.ItemType.menu;
+        sambaItem.itemParams = new String[]{"smb://" + ip};
+        MenuBean menuBean = findMenuByID("0").getData();
+        List<MenuBean.MenuItemBean> list = menuBean.items;
+        list.add(list.size() - 1, sambaItem);
+        findMenuByID("0").setData(menuBean);
+//        smbFileUtils = new SmbFileUtils(getContext(), "10.1.1.200");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregistReceiver();
+    }
+
+    void unregistReceiver() {
+        if (receiver != null)
+            getContext().unregisterReceiver(receiver);
     }
 
     @Override
@@ -202,6 +324,7 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
     }
 
     String handlingMenuID = null;
+    String retryMenuID = null;
 
     @Override
     public void onChildMenu(String childMenuID, final IMenu iMenu) {
@@ -210,6 +333,7 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         } else {
             return;
         }
+        responseKeyEvent(false);
         //生成数据bean
         createMenuBean(new File(childMenuID).getName(), iMenu.getData().menuID, childMenuID, new CreateMenuListener() {
             @Override
@@ -226,21 +350,29 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
                 currentMenuView.onComeIn();
                 showLeftArrow();
                 Log.d(TAG, "onChildMenu onCreated:menus.size:" + menus.size());
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        responseKeyEvent(true);
+                    }
+                }, 400);
             }
 
             @Override
             public void onFailed() {
-
+                responseKeyEvent(true);
             }
         });
     }
 
     @Override
     public void onSuperMenu(final IMenu iMenu) {
-        if (!iMenu.getData().superMenuID.equals(handlingMenuID)) {
-            handlingMenuID = iMenu.getData().superMenuID;
-        } else {
-            return;
+        if (iMenu.getData().superMenuID != null) {
+            if (!iMenu.getData().superMenuID.equals(handlingMenuID)) {
+                handlingMenuID = iMenu.getData().superMenuID;
+            } else {
+                return;
+            }
         }
         if (iMenu.getData().menuID.equals("0")) {
             dismiss();
@@ -259,10 +391,24 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         }
     }
 
+    public void setSupportVideoSuffix(String[] supportVideoSuffix) {
+        this.defaultSupportVideoSuffix = supportVideoSuffix;
+    }
 
-    SmbFileUtils smbFileUtils;
+    String[] defaultSupportVideoSuffix = new String[]{"mp4", "mkv", "avi", "mov", "rmvb", "mpg", "mpeg", "rm", "wmv"};
 
-    private void createMenuBean(String name, String superID, String mID, final CreateMenuListener createMenuListener) {
+    boolean checkSupport(String fileName) {
+        boolean ret = false;
+        for (String suffix : defaultSupportVideoSuffix) {
+            if (fileName.toLowerCase().contains(suffix)) {
+                ret = true;
+                break;
+            }
+        }
+        return ret;
+    }
+
+    private void createMenuBean(String name, String superID, final String mID, final CreateMenuListener createMenuListener) {
         Log.d(TAG, "createMenuBean name:" + name + " superID:" + superID + " mID:" + mID);
         final MenuBean ret = new MenuBean();
         ret.menuName = name;
@@ -271,49 +417,88 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
 
 
         if (mID.startsWith("smb://")) {
-            smbFileUtils.listSmbFilesForAndroid(mID, "tv", "mmmmmm", new SmbFileUtils.SmbListFilesListener() {
+            showWait();
+            SmbFileUtils.SmbListFilesListener listener = new SmbFileUtils.SmbListFilesListener() {
                 @Override
                 public void onSuccess(SmbFile[] smbFiles) {
+                    needUserPass = false;
                     MenuBean.MenuItemBean itemBean;
-                    for (SmbFile file : smbFiles) {
-                        itemBean = new MenuBean.MenuItemBean();
-                        try {
-                            itemBean.itemIcon = file.isFile() ? String.valueOf(R.drawable.file_60_60) : String.valueOf(R.drawable.fold_60_60);
-                            itemBean.itemType = file.isFile() ? MenuBean.MenuItemBean.ItemType.activity : MenuBean.MenuItemBean.ItemType.menu;
-                            itemBean.itemID = file.getPath();
-                            itemBean.itemName = file.getName();
-                            itemBean.itemParams = file.isFile() ? new String[]{onFileSelectedAction,file.getPath()} : new String[]{file.getPath()};
-                        } catch (SmbException e) {
-                            e.printStackTrace();
+                    try {
+                        for (SmbFile file : smbFiles) {
+                            boolean supported;
+                            if (file.isDirectory()) {
+                                if (file.getName().contains("$"))
+                                    supported = false;
+                                else
+                                    supported = true;
+                            } else {
+                                supported = checkSupport(file.getName());
+                            }
+
+
+                            if (supported) {
+                                itemBean = new MenuBean.MenuItemBean();
+                                itemBean.itemIcon = file.isFile() ? String.valueOf(R.drawable.file_60_60) : String.valueOf(R.drawable.fold_60_60);
+                                itemBean.itemType = file.isFile() ? MenuBean.MenuItemBean.ItemType.activity : MenuBean.MenuItemBean.ItemType.menu;
+                                itemBean.itemID = file.getPath();
+                                if(file.getName().lastIndexOf("/") == file.getName().length()-1)
+                                    itemBean.itemName = file.getName().substring(0,file.getName().length()-1);
+                                else
+                                    itemBean.itemName = file.getName();
+                                itemBean.itemParams = file.isFile() ? new String[]{onFileSelectedAction, file.getPath()} : new String[]{file.getPath()};
+                                ret.items.add(itemBean);
+                            }
                         }
-                        ret.items.add(itemBean);
+                    } catch (SmbException e) {
+                        e.printStackTrace();
                     }
                     createMenuListener.onCreated(ret);
-
+                    hideWait();
                 }
 
                 @Override
                 public void onAuthFailed(String path) {
-
+                    retryMenuID = mID;
+                    handlingMenuID = null;
+                    getContext().sendBroadcast(new Intent(Constant.ACTION_LOGIN_ACT));
+                    hideWait();
+                    createMenuListener.onFailed();
                 }
 
                 @Override
                 public void onHostUnconnected(String path) {
-
+                    Toast.makeText(getContext(), "连接失败", Toast.LENGTH_SHORT).show();
+                    hideWait();
+                    createMenuListener.onFailed();
                 }
-            });
+            };
+            SmbFileUtils smbFileUtils = null;
+            try {
+                SmbFile smbFile = new SmbFile(mID);
+                smbFileUtils = smbUtils.get(smbFile.getServer());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            if (needUserPass)
+                smbFileUtils.listSmbFilesForAndroid(mID, username, password, listener);
+            else
+                smbFileUtils.listSmbFilesForAndroid(mID, listener);
+
 
         } else {
             File parent = new File(mID);
             File[] childFiles = parent.listFiles();
             MenuBean.MenuItemBean itemBean;
             for (File file : childFiles) {
+                if(file.isFile() && !checkSupport(file.getName()))
+                    continue;
+
                 itemBean = new MenuBean.MenuItemBean();
                 itemBean.itemIcon = file.isFile() ? String.valueOf(R.drawable.file_60_60) : String.valueOf(R.drawable.fold_60_60);
                 itemBean.itemType = file.isFile() ? MenuBean.MenuItemBean.ItemType.activity : MenuBean.MenuItemBean.ItemType.menu;
                 itemBean.itemID = file.getAbsolutePath();
                 itemBean.itemName = file.getName();
-                itemBean.itemParams = file.isFile() ? new String[]{onFileSelectedAction,file.getAbsolutePath()} : new String[]{file.getAbsolutePath()};
+                itemBean.itemParams = file.isFile() ? new String[]{onFileSelectedAction, file.getAbsolutePath()} : new String[]{file.getAbsolutePath()};
                 ret.items.add(itemBean);
             }
             createMenuListener.onCreated(ret);
@@ -388,5 +573,23 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         void onClose();
 
         void onShow();
+    }
+
+    private void showWait() {
+        getView().findViewById(R.id.waitBar).setVisibility(View.VISIBLE);
+    }
+
+    private void hideWait() {
+        getView().findViewById(R.id.waitBar).setVisibility(View.INVISIBLE);
+    }
+
+    private void responseKeyEvent(boolean flag) {
+        if (dispatcher != null)
+            dispatcher.setResponse(flag);
+    }
+
+
+    public interface KeyEventDispatcher {
+        void setResponse(boolean flag);
     }
 }

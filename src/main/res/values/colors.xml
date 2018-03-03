@@ -22,6 +22,9 @@
     <color name="keyboard_btn_2">#858d97</color>
     <color name="keyboard_btn_close">#e76f6f</color>
     <color name="keyboard_btn_confirm">#6caee7</color>
-
     <color name="keyboard_bg">#34373b</color>
+
+
+    <color name="login_bg">#eb34373b</color>
+    <color name="login_text_color_hint">#c367696b</color>
 </resources>

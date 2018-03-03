@@ -42,7 +42,7 @@ import static org.crashxun.player.xunxun.common.Constant.KEY_PARAMS_ACTIVITY;
  * Created by xunxun on 2018/2/22.
  */
 
-public class XunxunMainActivity extends FragmentActivity implements ViewTreeObserver.OnGlobalFocusChangeListener {
+public class XunxunMainActivity extends FragmentActivity implements ViewTreeObserver.OnGlobalFocusChangeListener, FileBrowerFragment.KeyEventDispatcher {
     FileBrowerFragment f = null;
     private Handler mHandler = new Handler();
     ImageView bgImg;
@@ -66,7 +66,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
         f.setListener(new FileBrowerFragment.MenuEventListener() {
             @Override
             public void onClose() {
-
+                finish();
             }
 
             @Override
@@ -252,12 +252,17 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
                        String path = intent.getStringExtra(KEY_PARAMS_ACTIVITY);
 
                        String name = path;
-                        try {
-                            path  = URLEncoder.encode(path,"utf-8");
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                        play("http://"+PlayFileService.IP+":"+PlayFileService.PORT+"/"+path,name);
+
+                       if(path != null && path.startsWith("smb://")) {
+                           try {
+                               path = URLEncoder.encode(path, "utf-8");
+                           } catch (UnsupportedEncodingException e) {
+                               e.printStackTrace();
+                           }
+                           play("http://" + PlayFileService.IP + ":" + PlayFileService.PORT + "/" + path, name);
+                       } else {
+                           play(path,name);
+                       }
                     }
                 }
             };
@@ -275,4 +280,18 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
         startActivity(intentPlayer);
     }
 
+
+    boolean responseKeyEvent = true;
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if(responseKeyEvent)
+            return super.dispatchKeyEvent(event);
+        else
+            return true;
+    }
+
+    @Override
+    public void setResponse(boolean flag) {
+        this.responseKeyEvent = flag;
+    }
 }

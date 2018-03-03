@@ -28,7 +28,7 @@
         "itemID":"info",
         "itemName": "影片信息",
         "itemType": "activity",
-        "itemParams": ["action"],
+        "itemParams": ["org.crashxun.player.action_mediainfo"],
         "itemIcon":""
       }
     ]

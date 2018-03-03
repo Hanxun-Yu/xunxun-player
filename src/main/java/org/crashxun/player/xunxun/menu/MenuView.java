@@ -21,6 +21,7 @@ import android.widget.ScrollView;
 
 import org.crashxun.player.R;
 import org.crashxun.player.xunxun.ViewIDUtil;
+import org.crashxun.player.xunxun.common.Constant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -219,6 +220,7 @@ public class MenuView extends RelativeLayout implements IMenu {
                     public void onClick(View v) {
                         switch (item.itemType) {
                             case activity:
+                                sendBroadcastActivity(item);
                                 break;
                             case menu:
                                 lastFocus = v;
@@ -275,6 +277,15 @@ public class MenuView extends RelativeLayout implements IMenu {
         scrollView.setLayoutParams(scrollViewParams);
 
         addView(scrollView);
+    }
+    private void sendBroadcastActivity(MenuBean.MenuItemBean itemBean) {
+        Intent intent = new Intent(itemBean.itemParams[0]);
+        if(itemBean.itemParams.length>1) {
+            intent.putExtra(Constant.KEY_PARAMS_ACTIVITY, itemBean.itemParams[1]);
+        }
+//        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+        getContext().sendBroadcast(intent);
+        Log.d(TAG, "sendBroadcast intent:" + intent);
     }
 
     private void onRadioButtonClick(View v, MenuBean.MenuItemBean item) {

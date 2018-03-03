@@ -5,6 +5,11 @@ package org.crashxun.player.xunxun.common;
  */
 
 public class Constant {
+    public static final String ACTION_SMB_ADD_IP_ACT = "org.crashxun.player.action_smb_add_ip";
+    public static final String ACTION_LOGIN_ACT = "org.crashxun.player.action_login";
+
+
+    public static final String ACTION_MEDIAINFO = "org.crashxun.player.action_mediainfo";
     public static final String ACTION_MAIN_FILEBROWER_FILESELECTED = "org.crashxun.player.action_main_filebrower_fileselected";
     public static final String ACTION_SUBTITLE_TIME_ADJUST = "org.crashxun.player.action_subtitle_time_adjust";
     public static final String ACTION_SUBTITLE_AUTO_DOWNLOAD = "org.crashxun.player.action_subtitle_auto_download";

@@ -67,7 +67,14 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
         this.menuBean = menuBean;
         menuItemViewList = new ArrayList<>();
         initLayout(menuBean, itemWidth, itemHeight);
-        onInitAnim();
+
+
+        if(!hided) {
+            if(!menuItemViewList.isEmpty())
+                menuItemViewList.get(0).requestFocus();
+        } else {
+            onInitAnim();
+        }
     }
 
     ScrollView scrollView;
@@ -336,7 +343,9 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
 
     private void sendBroadcastActivity(MenuBean.MenuItemBean itemBean) {
         Intent intent = new Intent(itemBean.itemParams[0]);
-        intent.putExtra(Constant.KEY_PARAMS_ACTIVITY,itemBean.itemParams[1]);
+        if(itemBean.itemParams.length>1) {
+            intent.putExtra(Constant.KEY_PARAMS_ACTIVITY, itemBean.itemParams[1]);
+        }
 //        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
         getContext().sendBroadcast(intent);
         Log.d(TAG, "sendBroadcast intent:" + intent);
@@ -494,7 +503,7 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
 //        }
 //    }
 
-    boolean hided = false;
+    boolean hided = true;
 
     @Override
     public void onDismiss() {

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.inputmethodservice.KeyboardView;
 import android.text.TextUtils;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -102,6 +104,14 @@ public class KeyBoardView extends LinearLayout implements View.OnClickListener {
         editText.setText(initText);
     }
 
+    public void setInputType(int type) {
+        if(type == 1)
+            editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+        else
+            editText.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+
+    }
+
     private int[] getScreenWH() {
         DisplayMetrics dm = new DisplayMetrics();
         ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(dm);
@@ -111,7 +121,7 @@ public class KeyBoardView extends LinearLayout implements View.OnClickListener {
     }
 
 
-    EditText editText;
+    TextView editText;
     KeyBoardBtnView closeBtn;
     KeyBoardBtnView confirmBtn;
     View firstFocus = null;
@@ -123,7 +133,7 @@ public class KeyBoardView extends LinearLayout implements View.OnClickListener {
         LayoutParams params = new LayoutParams(-2, -2);
         linearLayout.setLayoutParams(params);
 
-        editText = new EditText(getContext());
+        editText = new TextView(getContext());
         editText.setFocusable(false);
         editText.setTextColor(getResources().getColor(R.color.menu_color));
         editText.setPadding(10, 0, 0, 0);
