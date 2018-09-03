@@ -55,6 +55,7 @@ import org.crashxun.player.widget.media.MediaPlayerCompat;
 import org.crashxun.player.widget.media.SurfaceRenderView;
 import org.crashxun.player.widget.media.TableLayoutBinder;
 import org.crashxun.player.widget.media.TextureRenderView;
+import org.crashxun.player.xunxun.activity.SubtitleSelectActivity;
 import org.crashxun.player.xunxun.fragment.MenuLeftFragment;
 import org.crashxun.player.xunxun.api.IPlayController;
 import org.crashxun.player.xunxun.common.Constant;
@@ -63,6 +64,7 @@ import org.crashxun.player.xunxun.menu.MenuParams;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -122,7 +124,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     private boolean mCanSeekForward = true;
 
     /** Subtitle rendering widget overlaid on top of the video. */
-    // private RenderingWidget mSubtitleWidget;
+//     private RenderingWidget mSubtitleWidget;
 
     /**
      * Listener for changes to subtitle data, used to redraw when needed.
@@ -888,10 +890,10 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         int selectedAudioTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
         int selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
 
-
         Log.d(TAG, "selectedSubtitleTrack:" + selectedSubtitleTrack);
 
         ITrackInfo trackInfos[] = mMediaPlayer.getTrackInfo();
+        Log.d(TAG,"trackInfos:"+ Arrays.toString(trackInfos));
         if (trackInfos != null) {
             int index = -1;
             for (ITrackInfo trackInfo : trackInfos) {
@@ -1004,6 +1006,11 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                     case Constant.ACTION_MEDIAINFO:
                         showMediaInfo();
                         break;
+
+                    case Constant.ACTION_SUBTITLE_LOAD:
+                        intent = new Intent(getContext(), SubtitleSelectActivity.class);
+                        getContext().startActivity(intent);
+                        break;
                 }
             }
         };
@@ -1015,6 +1022,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         intentFilter.addAction(Constant.ACTION_SUBTITLE_CHANGED);
         intentFilter.addAction(Constant.ACTION_SUBTITLE_TIME_ADJUST);
         intentFilter.addAction(Constant.ACTION_MEDIAINFO);
+        intentFilter.addAction(Constant.ACTION_SUBTITLE_LOAD);
 
 //        LocalBroadcastManager.getInstance(getContext()).registerReceiver(menuEventReceiver,intentFilter);
         getContext().registerReceiver(menuEventReceiver, intentFilter);
@@ -1362,8 +1370,8 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
 
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "timeout", 10000000);
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 1);
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "timeout", 60*1000*1000);
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "reconnect", 1);
 
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
@@ -1374,9 +1382,9 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
             break;
         }
 
-        if (mSettings.getEnableDetachedSurfaceTextureView()) {
+//        if (mSettings.getEnableDetachedSurfaceTextureView()) {
             mediaPlayer = new TextureMediaPlayer(mediaPlayer);
-        }
+//        }
 
         return mediaPlayer;
     }

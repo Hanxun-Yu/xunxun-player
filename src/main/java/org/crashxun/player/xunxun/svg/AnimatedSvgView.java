@@ -354,7 +354,7 @@ public class AnimatedSvgView extends View {
                             mFillBlues[i]);
                     canvas.drawPath(glyphData.path, mFillPaint);
                 }
-                Log.d(TAG,"phase:"+phase);
+//                Log.d(TAG,"phase:"+phase);
             }
         }
 

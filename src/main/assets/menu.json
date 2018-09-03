@@ -54,6 +54,12 @@
 
       },
       {
+        "itemID":"subtitle_load",
+        "itemName": "手动加载字幕",
+        "itemType": "activity",
+        "itemParams": ["org.crashxun.player.action_subtitle_load"]
+      },
+      {
         "itemID":"subtitle_adjust",
         "itemName": "校准时间轴",
         "itemType": "activity",

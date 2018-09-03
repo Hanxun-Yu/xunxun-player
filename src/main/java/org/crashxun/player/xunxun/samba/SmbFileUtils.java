@@ -3,11 +3,16 @@ package org.crashxun.player.xunxun.samba;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.crashxun.player.xunxun.service.PlayFileService;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -15,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jcifs.UniAddress;
 import jcifs.smb.NtlmPasswordAuthentication;
@@ -30,7 +37,7 @@ import jcifs.smb.SmbSession;
 public class SmbFileUtils {
     private static final String TAG = "SmbFileUtils_xunxun";
 
-    private Map<String, NtlmPasswordAuthentication> authMap = new HashMap<>();
+    private static Map<String, NtlmPasswordAuthentication> authMap = new HashMap<>();
     private List<FoldAuthInfo> foldAuthInfos;
 
     private NtlmPasswordAuthentication curAuthentication = null;
@@ -82,7 +89,7 @@ public class SmbFileUtils {
 
 
     private NtlmPasswordAuthentication getAuthentication(String username, String password) {
-        Log.d(TAG, "getAuthentication ip:"+IP+" username:"+username+" password:"+password);
+        Log.d(TAG, "getAuthentication ip:" + IP + " username:" + username + " password:" + password);
 
         NtlmPasswordAuthentication mAuthentication = new NtlmPasswordAuthentication(IP, username, password);
         try {
@@ -123,18 +130,18 @@ public class SmbFileUtils {
         });
     }
 
-    public void listSmbFilesForAndroid(final String path,final SmbListFilesListener smbListFilesListener) {
+    public void listSmbFilesForAndroid(final String path, final SmbListFilesListener smbListFilesListener) {
         executors.execute(new Runnable() {
             @Override
             public void run() {
-                listSmbFiles(path,smbListFilesListener);
+                listSmbFiles(path, smbListFilesListener);
             }
         });
     }
 
 
     private void listSmbFiles(final String path, NtlmPasswordAuthentication mAuthentication, final SmbListFilesListener smbListFilesListener) {
-        Log.d(TAG, "listSmbFiles path:" + path);
+        Log.d(TAG, "listSmbFiles path:" + path + " mAuthentication:" + mAuthentication);
         String rootPath = path;
         if (path.lastIndexOf("smb://") != 0) {
             rootPath = "smb://" + rootPath;
@@ -194,7 +201,7 @@ public class SmbFileUtils {
             e.printStackTrace();
             Log.e(TAG, "无权限");
             Log.e(TAG, "SmbAuthException:" + e.getMessage());
-            if(mAuthentication != null) {
+            if (mAuthentication != null) {
                 Log.e(TAG, "mAuthentication domain:" + mAuthentication.getDomain());
                 Log.e(TAG, "mAuthentication username:" + mAuthentication.getUsername());
                 Log.e(TAG, "mAuthentication password:" + mAuthentication.getPassword());
@@ -202,22 +209,18 @@ public class SmbFileUtils {
 
             if (mAuthentication == null) {
                 //尝试已缓存的授权
-                if (authMap.get(path) != null) {
-                    listSmbFiles(path, authMap.get(path), smbListFilesListener);
+                NtlmPasswordAuthentication authentication = getCacheAuth(path);
+                if (authentication != null) {
+                    listSmbFiles(path, authentication, smbListFilesListener);
                 } else {
-                    FoldAuthInfo foldAuthInfo = getFoldAuthInfo(path);
-                    if (foldAuthInfo != null) {
-                        listSmbFiles(path, getAuthentication(foldAuthInfo.username, foldAuthInfo.password), smbListFilesListener);
-                    } else {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                //无授权记录
-                                if (smbListFilesListener != null)
-                                    smbListFilesListener.onAuthFailed(path);
-                            }
-                        });
-                    }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //无授权记录
+                            if (smbListFilesListener != null)
+                                smbListFilesListener.onAuthFailed(path);
+                        }
+                    });
                 }
             } else {
                 handler.post(new Runnable() {
@@ -247,6 +250,19 @@ public class SmbFileUtils {
         }
     }
 
+    private NtlmPasswordAuthentication getCacheAuth(String path) {
+        NtlmPasswordAuthentication authentication = null;
+        authentication =authMap.get(path);
+
+        if (authentication == null) {
+            FoldAuthInfo foldAuthInfo = getFoldAuthInfo(path);
+            if (foldAuthInfo != null) {
+                authentication = getAuthentication(foldAuthInfo.username, foldAuthInfo.password);
+            }
+        }
+        return authentication;
+    }
+
     private class FoldAuthInfo {
 
         String path;
@@ -265,8 +281,9 @@ public class SmbFileUtils {
 
         public FoldAuthInfo(String path, String saveData) {
             this.path = path;
-            this.username = saveData.split("|")[0];
-            this.password = saveData.split("|")[1];
+            this.username = saveData.split("\\|")[0];
+            this.password = saveData.split("\\|")[1];
+            Log.d(TAG, "saveData:" + saveData + " username:" + username + " password:" + password);
         }
     }
 
@@ -275,11 +292,79 @@ public class SmbFileUtils {
     }
 
     private FoldAuthInfo getFoldAuthInfo(String path) {
+        Log.d(TAG, "getFoldAuthInfo path:" + path);
         FoldAuthInfo ret = null;
-        String saveData = (String) SharedPreferencesUtil.getData(mContext, IP, path, null);
-        if (saveData != null) {
+        String saveData = (String) SharedPreferencesUtil.getData(mContext, IP, path, "");
+        Log.d(TAG, "getFoldAuthInfo saveData:" + saveData);
+
+        if (!TextUtils.isEmpty(saveData)) {
             ret = new FoldAuthInfo(path, saveData);
         }
+        Log.d(TAG, "getFoldAuthInfo ret:" + ret);
+
         return ret;
     }
+
+    public static void downloadFile(final Context context, final String src, final String target, final SMBDownloadListener listener) {
+        Log.d(TAG,"downloadFile src:"+src+" target:"+target);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String regEx="((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)";
+                Pattern p = Pattern.compile(regEx);
+                Matcher m = p.matcher(src);
+
+                String ip = null;
+                if (m.find()) {
+                    ip=m.group();
+//break;   加break则提取string中的一个IP
+                }
+
+                if(TextUtils.isEmpty(ip)) {
+                    listener.onFailed("illegal ip :"+src);
+                } else {
+                    try {
+                        if(new File(target).exists()) {
+                            new File(target).delete();
+                        }
+                        String parent = src.substring(0,src.lastIndexOf("/")+1);
+                        SmbFileUtils smbFileUtils = new SmbFileUtils(context,ip);
+                        SmbFile file = new SmbFile(src,smbFileUtils.getCacheAuth(parent));
+                        Log.d(TAG,"parent:"+parent);
+                        FileOutputStream fileOutputStream = new FileOutputStream(target);
+                        InputStream inputStream = file.getInputStream();
+                        byte[] buff = new byte[1024];
+                        int count = 0;
+                        while ((count = inputStream.read(buff))>0) {
+                            Log.d(TAG,"count:"+count);
+                            fileOutputStream.write(buff,0,count);
+                        }
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                        inputStream.close();
+                        listener.onSuccess(target);
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                        listener.onFailed("MalformedURLException :"+e.getMessage());
+                    } catch (SmbAuthException e) {
+                        e.printStackTrace();
+                        listener.onFailed("SmbAuthException :"+e.getMessage());
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        listener.onFailed("FileNotFoundException :"+e.getMessage());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        listener.onFailed("IOException :"+e.getMessage());
+                    }
+                }
+            }
+        }).start();
+    }
+
+    public interface SMBDownloadListener {
+        void onSuccess(String path);
+
+        void onFailed(String msg);
+    }
+
 }

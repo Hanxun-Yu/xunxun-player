@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 
 public class SharedPreferencesUtil {
 
+    final static String TAG = "Shared_xunxun";
     //存储的sharedpreferences文件名
     private static final String FILE_NAME = "setting";
 
@@ -75,6 +76,7 @@ public class SharedPreferencesUtil {
      * @return
      */
     public static Object getData(Context context, String fileName,String key, Object defValue) {
+        Log.d(TAG,"fileName:"+fileName+" key:"+key+" defVakye:"+defValue);
         try {
             //利用java反射机制将XML文件自定义存储
             Field field;

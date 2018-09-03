@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import java.util.concurrent.Executors;
  */
 
 public class TimeView extends RelativeLayout {
+    final String TAG = "TimeView_xunxun";
     private Context mContext;
     private View mRoot;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -160,7 +162,10 @@ public class TimeView extends RelativeLayout {
         @Override
         public void run() {
             while (!stop) {
+//                Log.d(TAG,"loop");
                 Calendar c = Calendar.getInstance();
+//                Log.d(TAG,"loop c:"+c.getTime().toString());
+
                 TimeBean tb = new TimeBean(c.get(Calendar.DAY_OF_MONTH),
                         c.get(Calendar.HOUR_OF_DAY),
                         c.get(Calendar.MINUTE),

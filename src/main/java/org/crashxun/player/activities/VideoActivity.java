@@ -46,7 +46,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
 public class VideoActivity extends FragmentActivity implements TracksFragment.ITrackHolder {
-    private static final String TAG = "VideoActivity";
+    private static final String TAG = "VideoActivity_xunxun";
 
     private String mVideoPath;
     private String mVideoName;
@@ -84,6 +84,8 @@ public class VideoActivity extends FragmentActivity implements TracksFragment.IT
         mVideoPath = getIntent().getStringExtra("videoPath");
         Log.d(TAG,"videoPath:"+mVideoPath);
         mVideoName = getIntent().getStringExtra("videoName");
+        Log.d(TAG,"mVideoName:"+mVideoName);
+
 //        mVideoPath = "http://10.1.1.201/bmq10m.mp4";
 //        mVideoPath = "http://video.venjean.cn/sv/589e162b-1601585d5d7/589e162b-1601585d5d7.mp4";
 //        mVideoPath = "http://192.168.199.205/vod/movie/No.Escape.2015.1080p.BluRay.x264-DRONES[rarbg]/No.Escape.2015.1080p.BluRay.x264-DRONES.mkv";

@@ -184,10 +184,27 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
                 }
             }
         });
-        registReceiver();
 
         Intent intent = new Intent(this,PlayFileService.class);
         startService(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registReceiver();
+
+    }
+
+    private void unregistReceiver() {
+        if(fileSelectReceiver != null)
+            unregisterReceiver(fileSelectReceiver);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregistReceiver();
     }
 
     private void animateLogo() {
@@ -198,13 +215,15 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                animateLogo();
+//        mHandler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                animateLogo();
+//
+//            }
+//        }, 1000);
+        f.setUserVisibleHint(true);
 
-            }
-        }, 1000);
     }
 
     @Override

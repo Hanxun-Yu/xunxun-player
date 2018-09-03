@@ -17,6 +17,8 @@
     <color name="ijk_transparent_dark">#77000000</color>
 
     <color name="menu_color">#F1FCFCFC</color>
+    <color name="white_text_color">#F1FCFCFC</color>
+
 
     <color name="keyboard_btn_1">#646b74</color>
     <color name="keyboard_btn_2">#858d97</color>

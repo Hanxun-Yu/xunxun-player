@@ -13,6 +13,7 @@
 
         <TextView
             android:id="@+id/hour"
+            android:textColor="@color/white_text_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="12"
@@ -20,6 +21,7 @@
 
         <TextView
             android:id="@+id/maohao"
+            android:textColor="@color/white_text_color"
             android:layout_marginLeft="10px"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,6 +31,7 @@
 
         <TextView
             android:id="@+id/minute"
+            android:textColor="@color/white_text_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10px"

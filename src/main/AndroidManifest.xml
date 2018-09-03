@@ -69,6 +69,10 @@
         <activity android:name=".xunxun.activity.SMBServerAddActivity"
             android:theme="@style/login" >
         </activity>
+        <activity android:name=".xunxun.activity.SubtitleSelectActivity"
+            android:theme="@style/LeftMenu"
+            >
+        </activity>
         <!--<activity android:name=".widget.xunxun.activity.TestActivity">-->
 
         <!--</activity>-->

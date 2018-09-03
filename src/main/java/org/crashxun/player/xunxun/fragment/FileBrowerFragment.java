@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -94,6 +95,9 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         rootMenu.menuName = "root";
 //        String sdcardPath = Environment.getExternalStorageDirectory().getPath();
         String sdcardPath = "/sdcard";
+        if (new File(sdcardPath).listFiles() == null) {
+            sdcardPath = Environment.getExternalStorageDirectory().getPath();
+        }
 
         MenuBean.MenuItemBean sdcard = new MenuBean.MenuItemBean();
         sdcard.itemIcon = String.valueOf(R.drawable.fold_60_60);
@@ -122,6 +126,15 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         smb10_1_1_201.itemParams = new String[]{"smb://10.1.1.201"};
         rootMenu.items.add(smb10_1_1_201);
         addSmbUtils("10.1.1.201");
+
+        MenuBean.MenuItemBean smb192_168_200_201 = new MenuBean.MenuItemBean();
+        smb192_168_200_201.itemIcon = String.valueOf(R.drawable.fold_60_60);
+        smb192_168_200_201.itemName = "192.168.200.201";
+        smb192_168_200_201.itemID = "smb://192.168.200.201";
+        smb192_168_200_201.itemType = MenuBean.MenuItemBean.ItemType.menu;
+        smb192_168_200_201.itemParams = new String[]{"smb://192.168.200.201"};
+        rootMenu.items.add(smb192_168_200_201);
+        addSmbUtils("192.168.200.201");
 
         //
 
@@ -328,6 +341,7 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
 
     @Override
     public void onChildMenu(String childMenuID, final IMenu iMenu) {
+        Log.d(TAG, "onChildMenu childMenuID:" + childMenuID);
         if (!childMenuID.equals(handlingMenuID)) {
             handlingMenuID = childMenuID;
         } else {
@@ -396,12 +410,20 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
     }
 
     String[] defaultSupportVideoSuffix = new String[]{"mp4", "mkv", "avi", "mov", "rmvb", "mpg", "mpeg", "rm", "wmv"};
+    String[] defaultUnSupportVideoPrefix = new String[]{"."};
 
     boolean checkSupport(String fileName) {
         boolean ret = false;
         for (String suffix : defaultSupportVideoSuffix) {
             if (fileName.toLowerCase().contains(suffix)) {
                 ret = true;
+                break;
+            }
+        }
+
+        for (String prefix : defaultUnSupportVideoPrefix) {
+            if (fileName.toLowerCase().startsWith(prefix)) {
+                ret = false;
                 break;
             }
         }
@@ -441,8 +463,8 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
                                 itemBean.itemIcon = file.isFile() ? String.valueOf(R.drawable.file_60_60) : String.valueOf(R.drawable.fold_60_60);
                                 itemBean.itemType = file.isFile() ? MenuBean.MenuItemBean.ItemType.activity : MenuBean.MenuItemBean.ItemType.menu;
                                 itemBean.itemID = file.getPath();
-                                if(file.getName().lastIndexOf("/") == file.getName().length()-1)
-                                    itemBean.itemName = file.getName().substring(0,file.getName().length()-1);
+                                if (file.getName().lastIndexOf("/") == file.getName().length() - 1)
+                                    itemBean.itemName = file.getName().substring(0, file.getName().length() - 1);
                                 else
                                     itemBean.itemName = file.getName();
                                 itemBean.itemParams = file.isFile() ? new String[]{onFileSelectedAction, file.getPath()} : new String[]{file.getPath()};
@@ -490,7 +512,7 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
             File[] childFiles = parent.listFiles();
             MenuBean.MenuItemBean itemBean;
             for (File file : childFiles) {
-                if(file.isFile() && !checkSupport(file.getName()))
+                if (file.isFile() && !checkSupport(file.getName()))
                     continue;
 
                 itemBean = new MenuBean.MenuItemBean();

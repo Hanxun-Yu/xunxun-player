@@ -108,7 +108,8 @@ public class MenuView extends RelativeLayout implements IMenu {
 //                        if(!menuBean.menuID.equals("0"))
 //                            btn.hideLeftIcon();
 
-                        if(item.itemID.equals("subtitle_adjust"))
+                        if(item.itemID.equals("subtitle_adjust")
+                                || item.itemID.equals("subtitle_load"))
                             btn.hideLeftIcon();
                         break;
                 }

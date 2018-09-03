@@ -14,6 +14,8 @@ public class Constant {
     public static final String ACTION_SUBTITLE_TIME_ADJUST = "org.crashxun.player.action_subtitle_time_adjust";
     public static final String ACTION_SUBTITLE_AUTO_DOWNLOAD = "org.crashxun.player.action_subtitle_auto_download";
     public static final String ACTION_SUBTITLE_CHANGED = "org.crashxun.player.action_subtitle_changed";
+    public static final String ACTION_SUBTITLE_LOAD = "org.crashxun.player.action_subtitle_load";
+
     public static final String ACTION_AUDIO_CHANGED = "org.crashxun.player.action_audio_changed";
     public static final String ACTION_RATIO_CHANGED = "org.crashxun.player.action_ratio_changed";
 
