@@ -197,8 +197,10 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
     }
 
     private void unregistReceiver() {
-        if(fileSelectReceiver != null)
+        if(fileSelectReceiver != null) {
             unregisterReceiver(fileSelectReceiver);
+            fileSelectReceiver = null;
+        }
     }
 
     @Override

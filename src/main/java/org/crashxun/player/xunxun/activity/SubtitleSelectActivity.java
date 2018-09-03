@@ -164,8 +164,10 @@ public class SubtitleSelectActivity extends FragmentActivity implements FileBrow
     }
 
     private void unregistReceiver() {
-        if (fileSelectReceiver != null)
+        if (fileSelectReceiver != null) {
             unregisterReceiver(fileSelectReceiver);
+            fileSelectReceiver = null;
+        }
     }
 
 
