@@ -60,6 +60,8 @@ import org.crashxun.player.xunxun.fragment.MenuLeftFragment;
 import org.crashxun.player.xunxun.api.IPlayController;
 import org.crashxun.player.xunxun.common.Constant;
 import org.crashxun.player.xunxun.menu.MenuParams;
+import org.crashxun.player.xunxun.subtitle.api.ISubtitleController;
+import org.crashxun.player.xunxun.subtitle.api.ISubtitleController.ISubtitleMediaPlayer;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,7 +82,7 @@ import tv.danmaku.ijk.media.player.misc.IMediaFormat;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.player.misc.IjkMediaFormat;
 
-public class XunVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
+public class XunVideoView extends FrameLayout implements MediaController.MediaPlayerControl,ISubtitleMediaPlayer {
     private String TAG = "XunVideoView_xunxun";
     // settable by the client
     private Uri mUri;
@@ -113,6 +115,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
     private int mSurfaceHeight;
     private int mVideoRotationDegree;
     private IPlayController mMediaController;
+    private ISubtitleController subtitleController;
     private IMediaPlayer.OnCompletionListener mOnCompletionListener;
     private IMediaPlayer.OnPreparedListener mOnPreparedListener;
     private int mCurrentBufferPercentage;
@@ -232,7 +235,6 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                 Gravity.CENTER);
         renderUIView.setLayoutParams(lp);
         addView(renderUIView);
-
         mRenderView.addRenderCallback(mSHCallback);
         mRenderView.setVideoRotation(mVideoRotationDegree);
     }
@@ -399,6 +401,22 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         }
         mMediaController = controller;
         attachMediaController();
+    }
+
+    public void setSubtitleController(ISubtitleController controller) {
+        if(this.subtitleController != null)
+            subtitleController.detach();
+        this.subtitleController = controller;
+        attachSubtitleController();
+    }
+
+    private void attachSubtitleController() {
+        if (mMediaPlayer != null && subtitleController != null) {
+            subtitleController.bindMediaPlayer(this);
+            View anchorView = this.getParent() instanceof View ?
+                    (View) this.getParent() : this;
+            subtitleController.setAnchorView(anchorView);
+        }
     }
 
     private void attachMediaController() {
@@ -994,7 +1012,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                             //内嵌字幕
                             if(type.equals(Constant.VALUE_PARAMS_SUBTITLE_TYPE_INTERNAL)) {
                                 trackIndex = Integer.parseInt(id);
-                                Log.d(TAG, "menuEventReceiver----ACTION_SUBTITLE_CHANGED:" + trackIndex);
+                                Log.d(TAG, "menuEventReceiver----ACTION_SUBTITLE_CHANGED: internal:" + trackIndex);
 
                                 for (MenuParams.MTrackInfo mTrackInfo : mMenuParams.internalSubtitleList) {
                                     if (mTrackInfo.trackIndex == trackIndex) {
@@ -1004,6 +1022,8 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                                 }
                             } else if(type.equals(Constant.VALUE_PARAMS_SUBTITLE_TYPE_EXTERNAL)) {
                                 //外挂字幕
+                                Log.d(TAG, "menuEventReceiver----ACTION_SUBTITLE_CHANGED: external:" + id);
+
                                 String path = id;
                             }
 
@@ -1591,5 +1611,20 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 
     public int getSelectedTrack(int trackType) {
         return MediaPlayerCompat.getSelectedTrack(mMediaPlayer, trackType);
+    }
+
+    @Override
+    public long getCurrentPostion() {
+        return mMediaPlayer.getCurrentPosition();
+    }
+
+    @Override
+    public int getMovieWidth() {
+        return mRenderView.getView().getWidth();
+    }
+
+    @Override
+    public int getMovieHeight() {
+        return mRenderView.getView().getHeight();
     }
 }

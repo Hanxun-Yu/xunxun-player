@@ -11,13 +11,14 @@ import tv.danmaku.ijk.media.player.IMediaPlayer;
  * 字幕控制器,根据字幕文件类型,选择相应字幕解析器
  */
 public interface ISubtitleController {
-    void bindMediaPlayer(IMediaPlayer player);
+    void bindMediaPlayer(ISubtitleMediaPlayer player);
     void setAnchorView(View view);
     void switchSubtitle(String path);
     int timeAdjust(int millisecond);
     void show();
     void hide();
     boolean isShowing();
+    void detach();
 
     void setOnStateChangedListener(OnStateChangedListener listener);
 
@@ -27,5 +28,11 @@ public interface ISubtitleController {
         void onStopRender(String path);
 
         void onStartRender(String path);
+    }
+
+    interface ISubtitleMediaPlayer {
+        long getCurrentPostion();
+        int getMovieWidth();
+        int getMovieHeight();
     }
 }

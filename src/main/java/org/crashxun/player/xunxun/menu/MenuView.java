@@ -66,6 +66,14 @@ public class MenuView extends RelativeLayout implements IMenu {
         onInitAnim();
     }
 
+    public void updateData(MenuBean menuBean) {
+        this.menuBean = menuBean;
+        menuItemViewList = new ArrayList<>();
+        initLayout(menuBean, itemWidth, itemHeight);
+        recoveryFocusable(null);
+        requestFocus();
+    }
+
     ScrollView scrollView;
     private void initLayout(final MenuBean menuBean, int itemWidth, int itemHeight) {
         this.setBackgroundDrawable(null);

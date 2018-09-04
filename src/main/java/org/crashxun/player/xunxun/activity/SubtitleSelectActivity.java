@@ -163,6 +163,7 @@ public class SubtitleSelectActivity extends FragmentActivity implements FileBrow
         Intent intent = new Intent(Constant.ACTION_SUBTITLE_LOAD_FINISH);
         intent.putExtra(Constant.KEY_PARAMS_SUBTITLE,path);
         sendBroadcast(intent);
+        finish();
     }
 
 

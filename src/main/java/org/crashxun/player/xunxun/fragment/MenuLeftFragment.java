@@ -203,12 +203,13 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
     }
 
     public void addSubtitle(String name, String path) {
+        Log.d(TAG,"addSubtitle name:"+name+" path:"+path);
         MenuBean menuBean = findMenuByID(MenuIDConst.ID_MENU_SUBTITLE_SUB).getData();
         //修改bean,加入item后
         MenuBean.MenuItemBean itemBean = getSubItem(name, false, false, path);
         menuBean.items.add(++subtitleIndex, itemBean);
 
-        findMenuByID(MenuIDConst.ID_MENU_SUBTITLE_SUB).setData(menuBean);
+        findMenuByID(MenuIDConst.ID_MENU_SUBTITLE_SUB).updateData(menuBean);
 
     }
 

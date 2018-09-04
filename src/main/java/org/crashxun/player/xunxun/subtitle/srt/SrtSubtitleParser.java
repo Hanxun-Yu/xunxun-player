@@ -111,6 +111,10 @@ public class SrtSubtitleParser implements ISubtitleParser {
                 if (listener != null)
                     listener.onLoading(path, (int) (i * 100f / strArr.length));
                 Log.d(TAG, "convertToEvent i:" + index + " subtitleEventItem:" + subtitleEventItem);
+
+
+                //排序
+                //...
             }
 
             if (listener != null)

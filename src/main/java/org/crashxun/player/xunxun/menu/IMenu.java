@@ -14,6 +14,7 @@ public interface IMenu {
     void setOnKeyListener(OnKeyListener onKeyListener);
     MenuBean getData();
     void setData(MenuBean menuBean);
+    void updateData(MenuBean menuBean);
     interface OnKeyListener {
         boolean onKey(KeyEvent event, IMenu iMenu);
         void onChildMenu(String childMenuID,IMenu iMenu);

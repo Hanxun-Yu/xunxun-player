@@ -78,6 +78,11 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
         }
     }
 
+    @Override
+    public void updateData(MenuBean menuBean) {
+
+    }
+
     ScrollView scrollView;
 
     private void initLayout(final MenuBean menuBean, int itemWidth, int itemHeight) {
