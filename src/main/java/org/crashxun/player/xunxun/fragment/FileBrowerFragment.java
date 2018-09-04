@@ -26,6 +26,7 @@ import org.crashxun.player.xunxun.activity.LoginActivity;
 import org.crashxun.player.xunxun.activity.SMBServerAddActivity;
 import org.crashxun.player.xunxun.activity.XunxunMainActivity;
 import org.crashxun.player.xunxun.common.Constant;
+import org.crashxun.player.xunxun.common.MenuIDConst;
 import org.crashxun.player.xunxun.menu.FileBrowerView;
 import org.crashxun.player.xunxun.menu.IMenu;
 import org.crashxun.player.xunxun.menu.MenuBean;
@@ -91,7 +92,7 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         //        if (data == null) {
         onFileSelectedAction = getArguments().getString("params");
         MenuBean rootMenu = new MenuBean();
-        rootMenu.menuID = "0";
+        rootMenu.menuID = MenuIDConst.ID_MENU_ROOT;
         rootMenu.menuName = "root";
 //        String sdcardPath = Environment.getExternalStorageDirectory().getPath();
         String sdcardPath = "/sdcard";
@@ -218,10 +219,10 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         sambaItem.itemID = "smb://" + ip;
         sambaItem.itemType = MenuBean.MenuItemBean.ItemType.menu;
         sambaItem.itemParams = new String[]{"smb://" + ip};
-        MenuBean menuBean = findMenuByID("0").getData();
+        MenuBean menuBean = findMenuByID(MenuIDConst.ID_MENU_ROOT).getData();
         List<MenuBean.MenuItemBean> list = menuBean.items;
         list.add(list.size() - 1, sambaItem);
-        findMenuByID("0").setData(menuBean);
+        findMenuByID(MenuIDConst.ID_MENU_ROOT).setData(menuBean);
 //        smbFileUtils = new SmbFileUtils(getContext(), "10.1.1.200");
     }
 
@@ -243,8 +244,8 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
         if (isVisibleToUser) {
             if (listener != null)
                 listener.onShow();
-            setTile(findMenuByID("0").getData().menuName);
-            currentMenuView = findMenuByID("0");
+            setTile(findMenuByID(MenuIDConst.ID_MENU_ROOT).getData().menuName);
+            currentMenuView = findMenuByID(MenuIDConst.ID_MENU_ROOT);
             currentMenuView.onComeIn();
 //            showShadow();
         } else {
@@ -388,14 +389,14 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
                 return;
             }
         }
-        if (iMenu.getData().menuID.equals("0")) {
+        if (iMenu.getData().menuID.equals(MenuIDConst.ID_MENU_ROOT)) {
             dismiss();
         } else {
             currentMenuView.onDismiss();
             currentMenuView = findMenuByID(iMenu.getData().superMenuID);
             currentMenuView.onComeback();
             setTile(findMenuByID(iMenu.getData().superMenuID).getData().menuName);
-            if (currentMenuView.getData().menuID.equals("0")) {
+            if (currentMenuView.getData().menuID.equals(MenuIDConst.ID_MENU_ROOT)) {
                 hideLeftArrow();
             }
             //去除子项

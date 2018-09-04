@@ -22,6 +22,7 @@ import android.widget.ScrollView;
 import org.crashxun.player.R;
 import org.crashxun.player.xunxun.ViewIDUtil;
 import org.crashxun.player.xunxun.common.Constant;
+import org.crashxun.player.xunxun.common.MenuIDConst;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,13 +116,13 @@ public class MenuView extends RelativeLayout implements IMenu {
                 }
 
                 if (item.itemID != null) {
-                    if (item.itemID.equals("subtitle"))
+                    if (item.itemID.equals(MenuIDConst.ID_ITEM_SUBTITLE))
                         btn.setLeftIcon(R.drawable.icon_subtitle_normal);
-                    else if (item.itemID.equals("audio"))
+                    else if (item.itemID.equals(MenuIDConst.ID_ITEM_AUDIO))
                         btn.setLeftIcon(R.drawable.icon_audio_track_normal);
-                    else if (item.itemID.equals("ratio"))
+                    else if (item.itemID.equals(MenuIDConst.ID_ITEM_RATIO))
                         btn.setLeftIcon(R.drawable.icon_aspect_ratio_normal);
-                    else if (item.itemID.equals("info"))
+                    else if (item.itemID.equals(MenuIDConst.ID_ITEM_INFO))
                         btn.setLeftIcon(R.drawable.icon_mc_normal);
                     else {
                         if(item.itemIcon != null)
@@ -177,6 +178,7 @@ public class MenuView extends RelativeLayout implements IMenu {
 //                                break;
                         }
 
+                        //返回键
                         if(event.getAction() == KeyEvent.ACTION_UP) {
                             if( keyCode == KeyEvent.KEYCODE_DPAD_LEFT ||
                                     keyCode == KeyEvent.KEYCODE_BACK) {
@@ -232,6 +234,8 @@ public class MenuView extends RelativeLayout implements IMenu {
                             case checkbox:
                                 item.itemParams[1] = String.valueOf(!Boolean.parseBoolean(item.itemParams[1]));
                                 finalBtn1.setParams(item.itemParams);
+                                //checkbox暂没有处理
+                                //...
                                 break;
                             case radiobutton:
                                 onRadioButtonClick(v, item);
@@ -317,6 +321,7 @@ public class MenuView extends RelativeLayout implements IMenu {
 
         boolean checked = Boolean.parseBoolean(itemBean.itemParams[1]);
 
+        //radiobutton,这里肯定是true
         Map<String,String> param = checked?itemBean.itemParamsKV.get(0):itemBean.itemParamsKV.get(1);
         for (String key : param.keySet()) {
             intent.putExtra(key,param.get(key));

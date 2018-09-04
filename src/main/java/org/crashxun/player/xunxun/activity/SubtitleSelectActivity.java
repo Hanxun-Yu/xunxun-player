@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import org.crashxun.player.R;
 import org.crashxun.player.activities.VideoActivity;
+import org.crashxun.player.xunxun.common.Constant;
 import org.crashxun.player.xunxun.fragment.FileBrowerFragment;
 import org.crashxun.player.xunxun.samba.SmbFileUtils;
 
@@ -112,13 +113,25 @@ public class SubtitleSelectActivity extends FragmentActivity implements FileBrow
                             //下载文件
                             SmbFileUtils.downloadFile(SubtitleSelectActivity.this, path, file.getAbsolutePath(), new SmbFileUtils.SMBDownloadListener() {
                                 @Override
-                                public void onSuccess(String path) {
+                                public void onSuccess(final String path) {
                                     Log.d(TAG,"onSuccess path:"+path);
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            handlerFile(path);
+                                        }
+                                    });
                                 }
 
                                 @Override
                                 public void onFailed(String msg) {
                                     Log.d(TAG,"onFailed msg:"+msg);
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(SubtitleSelectActivity.this,"字幕下载失败",Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
 
                                 }
                             });
@@ -147,7 +160,9 @@ public class SubtitleSelectActivity extends FragmentActivity implements FileBrow
 
     void handlerFile(String path) {
         Log.d(TAG,"handlerFile path:"+path);
-
+        Intent intent = new Intent(Constant.ACTION_SUBTITLE_LOAD_FINISH);
+        intent.putExtra(Constant.KEY_PARAMS_SUBTITLE,path);
+        sendBroadcast(intent);
     }
 
 

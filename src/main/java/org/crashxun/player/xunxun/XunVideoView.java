@@ -835,6 +835,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         transaction.commit();
     }
 
+
     boolean menuHasParams = false;
 
     private void setMenuParams() {
@@ -977,29 +978,38 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                         break;
 
                     case Constant.ACTION_SUBTITLE_CHANGED:
-                        params = intent.getStringExtra(Constant.KEY_PARAMS_SUBTITLE);
+                        String id = intent.getStringExtra(Constant.KEY_PARAMS_SUBTITLE_ID);
+                        String type = intent.getStringExtra(Constant.KEY_PARAMS_SUBTITLE_TYPE);
+
                         int selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
-                        if (params.equals("off")) {
+                        if (id.equals("off")) {
                             //内字幕
                             if (selectedSubtitleTrack != -1) {
                                 deselectTrack(selectedSubtitleTrack);
                             }
 
-                            //外字幕
+                            //停止外挂字幕
 
                         } else {
-                            trackIndex = Integer.parseInt(params);
-                            Log.d(TAG, "menuEventReceiver----ACTION_SUBTITLE_CHANGED:" + trackIndex);
+                            //内嵌字幕
+                            if(type.equals(Constant.VALUE_PARAMS_SUBTITLE_TYPE_INTERNAL)) {
+                                trackIndex = Integer.parseInt(id);
+                                Log.d(TAG, "menuEventReceiver----ACTION_SUBTITLE_CHANGED:" + trackIndex);
 
-                            for (MenuParams.MTrackInfo mTrackInfo : mMenuParams.internalSubtitleList) {
-                                if (mTrackInfo.trackIndex == trackIndex) {
-                                    selectTrack(trackIndex);
-                                    break;
+                                for (MenuParams.MTrackInfo mTrackInfo : mMenuParams.internalSubtitleList) {
+                                    if (mTrackInfo.trackIndex == trackIndex) {
+                                        selectTrack(trackIndex);
+                                        break;
+                                    }
                                 }
+                            } else if(type.equals(Constant.VALUE_PARAMS_SUBTITLE_TYPE_EXTERNAL)) {
+                                //外挂字幕
+                                String path = id;
                             }
+
                         }
-                        selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
-                        Log.d(TAG, "menuEventReceiver----selectedSubtitleTrack:" + selectedSubtitleTrack);
+//                        selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
+//                        Log.d(TAG, "menuEventReceiver----selectedSubtitleTrack:" + selectedSubtitleTrack);
 
                         break;
 
@@ -1010,6 +1020,12 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
                     case Constant.ACTION_SUBTITLE_LOAD:
                         intent = new Intent(getContext(), SubtitleSelectActivity.class);
                         getContext().startActivity(intent);
+                        break;
+
+                    case Constant.ACTION_SUBTITLE_LOAD_FINISH:
+                        //选完字幕
+                        String path = intent.getStringExtra(Constant.KEY_PARAMS_SUBTITLE);
+                        addExternalSubtitle(path);
                         break;
                 }
             }
@@ -1023,6 +1039,7 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         intentFilter.addAction(Constant.ACTION_SUBTITLE_TIME_ADJUST);
         intentFilter.addAction(Constant.ACTION_MEDIAINFO);
         intentFilter.addAction(Constant.ACTION_SUBTITLE_LOAD);
+        intentFilter.addAction(Constant.ACTION_SUBTITLE_LOAD_FINISH);
 
 //        LocalBroadcastManager.getInstance(getContext()).registerReceiver(menuEventReceiver,intentFilter);
         getContext().registerReceiver(menuEventReceiver, intentFilter);
@@ -1040,6 +1057,11 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
 //        }
 //    };
 
+    private void addExternalSubtitle(String path) {
+        MenuLeftFragment f = (MenuLeftFragment) ((FragmentActivity) getContext()).getSupportFragmentManager().findFragmentById(R.id.right_drawer);
+        f.addSubtitle("外挂",path);
+    }
+
     private void unregistMenuEvent() {
         Log.d(TAG, "unregistMenuEvent");
         if (menuEventReceiver != null) {
@@ -1052,10 +1074,10 @@ public class XunVideoView extends FrameLayout implements MediaController.MediaPl
         String ret = null;
         switch (ratio) {
             case IRenderView.AR_ASPECT_FILL_PARENT:
-                ret = Constant.VAULE_PARAMS_RATIO_stretch;
+                ret = Constant.VALUE_PARAMS_RATIO_stretch;
                 break;
             case IRenderView.AR_ASPECT_WRAP_CONTENT:
-                ret = Constant.VAULE_PARAMS_RATIO_adapte;
+                ret = Constant.VALUE_PARAMS_RATIO_adapte;
                 break;
         }
         return ret;

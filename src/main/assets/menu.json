@@ -39,17 +39,17 @@
     "superMenuID":"0",
     "items": [
       {
-        "itemID":"1",
+        "itemID":"no_subtitle",
         "itemName": "无字幕",
         "itemType": "radiobutton",
-        "itemParams": ["org.crashxun.player.action_subtitle_changed","true","0"],
-        "itemParamsKV":[{"org.crashxun.player.key_subtitle":"off"}]
+        "itemParams": ["org.crashxun.player.action_subtitle_changed","true","0"], //params:action, selected, radiobtnID
+        "itemParamsKV":[{"org.crashxun.player.key_subtitle_id":"off"}]
       },
       {
-        "itemID":"2",
+        "itemID":"autodown_subtitle",
         "itemName": "自动下载字幕",
         "itemType": "checkbox",
-        "itemParams": ["org.crashxun.player.action_subtitle_auto_download","true","1"],
+        "itemParams": ["org.crashxun.player.action_subtitle_auto_download","true","1"],//itemParams[1] 为true,则发送itemParamsKV[0] ,否则发送[]
         "itemParamsKV":[{"org.crashxun.player.key_subtitle":"on"},{"org.crashxun.player.key_subtitle":"off"}]
 
       },

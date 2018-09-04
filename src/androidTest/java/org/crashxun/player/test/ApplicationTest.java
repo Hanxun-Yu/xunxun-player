@@ -1,10 +1,13 @@
 package org.crashxun.player.test;
 
 import android.app.Application;
+import android.os.Looper;
 import android.test.ApplicationTestCase;
 import android.util.Log;
 
 import org.crashxun.player.xunxun.samba.SmbFileUtils;
+import org.crashxun.player.xunxun.subtitle.api.ISubtitleParser;
+import org.crashxun.player.xunxun.subtitle.srt.SrtSubtitleParser;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -29,6 +32,13 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
 
 
     String TAG = "ApplicationTest_xunxun";
+
+    public void testSub() {
+        ISubtitleParser subtitleParser = new SrtSubtitleParser();
+        subtitleParser.loadFile("/sdcard/Game.of.Thrones.S01E01.srt");
+//        subtitleParser.loadFile("/sdcard/Game.of.Thrones.S01E10.ass");
+        Looper.loop();
+    }
 
     public void testSmb() {
         String ip = "10.1.1.200/system";

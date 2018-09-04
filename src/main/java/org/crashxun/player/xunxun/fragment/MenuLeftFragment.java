@@ -20,6 +20,7 @@ import com.google.gson.reflect.TypeToken;
 
 import org.crashxun.player.R;
 import org.crashxun.player.xunxun.common.Constant;
+import org.crashxun.player.xunxun.common.MenuIDConst;
 import org.crashxun.player.xunxun.menu.IMenu;
 import org.crashxun.player.xunxun.menu.MenuBean;
 import org.crashxun.player.xunxun.menu.MenuParams;
@@ -28,9 +29,7 @@ import org.crashxun.player.xunxun.menu.MenuView;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by xunxun on 2018/2/12.
@@ -89,8 +88,8 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
         if (isVisibleToUser) {
             if (listener != null)
                 listener.onShow();
-            setTile(findMenuByID("0").getData().menuName);
-            currentMenuView = findMenuByID("0");
+            setTile(findMenuByID(MenuIDConst.ID_MENU_ROOT).getData().menuName);
+            currentMenuView = findMenuByID(MenuIDConst.ID_MENU_ROOT);
             currentMenuView.onComeIn();
             showShadow();
         } else {
@@ -105,6 +104,7 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
         f.setArguments(bundle);
         return f;
     }
+
     public static MenuLeftFragment newInstance() {
 //        Bundle bundle = new Bundle();
 //        bundle.putString("params", params);
@@ -119,6 +119,7 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
 //
 //    }
 
+
     public void updateArgument(Bundle args) {
         initParams(args);
     }
@@ -126,75 +127,88 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
 
     String json;
 
+    MenuParams params;
+
+    final String SUBTITLE_RADIO_ID = "0";
+    final String AUDIO_RADIO_ID = "1";
+
+    int subtitleIndex = 0;//字幕加到第几个
+
+    //如何把字幕添加进来
+    //1.菜单列表实时数据保存在哪里,目前是json
+    //2.获取实时数据,插入字幕数据
     private void initParams(Bundle args) {
-        //音轨列表
-        //字幕列表
-        //字幕延迟时间
-        //影片信息
-        //画面比例
+
         json = args.getString("params");
-        MenuParams params = new Gson().fromJson(json, MenuParams.class);
-        IMenu audioSubMenu = findMenuByID("audioSub");
+        params = new Gson().fromJson(json, MenuParams.class);
+
+        //音轨列表
+        IMenu audioSubMenu = findMenuByID(MenuIDConst.ID_MENU_AUDIO_SUB);
         MenuBean audioSubData = audioSubMenu.getData();
         audioSubData.items.clear();
         for (MenuParams.MTrackInfo mTrackInfo : params.audioList) {
-            MenuBean.MenuItemBean itemBean = new MenuBean.MenuItemBean();
-            itemBean.itemType = MenuBean.MenuItemBean.ItemType.radiobutton;
-            itemBean.itemName = mTrackInfo.trackName;
-            itemBean.itemParams = new String[]{Constant.ACTION_AUDIO_CHANGED,
-                    mTrackInfo.selected ? "true" : "false", "1"};
-            Map<String, String> itemParams = new HashMap<>();
-            itemParams.put(Constant.KEY_PARAMS_AUDIO, String.valueOf(mTrackInfo.trackIndex));
-            itemBean.itemParamsKV.add(itemParams);
-            itemBean.itemID = String.valueOf(mTrackInfo.trackIndex);
+            MenuBean.MenuItemBean itemBean = new MenuBean.MenuItemBean.Builder()
+                    .setItemType(MenuBean.MenuItemBean.ItemType.radiobutton)
+                    .setItemName(mTrackInfo.trackName)
+                    .setItemID(String.valueOf(mTrackInfo.trackIndex))
+                    .setRadioButtonParam(Constant.ACTION_AUDIO_CHANGED,
+                            mTrackInfo.selected, AUDIO_RADIO_ID)
+                    .addParamKV(0, Constant.KEY_PARAMS_AUDIO, String.valueOf(mTrackInfo.trackIndex))
+                    .build();
             audioSubData.items.add(itemBean);
         }
         audioSubMenu.setData(audioSubData);
 
-
-        IMenu ratioSubMenu = findMenuByID("ratioSub");
+        //画面比例
+        IMenu ratioSubMenu = findMenuByID(MenuIDConst.ID_MENU_RATIO_SUB);
         MenuBean ratioSubData = ratioSubMenu.getData();
         for (MenuBean.MenuItemBean itemBean : ratioSubData.items) {
             Log.d(TAG, itemBean.toString());
-            if (itemBean.itemID.equals(params.ratio)) {
-                itemBean.itemParams[1] = "true";
-            } else {
-                itemBean.itemParams[1] = "false";
-            }
+            itemBean.itemParams[1] = String.valueOf(itemBean.itemID.equals(params.ratio));
         }
         ratioSubMenu.setData(ratioSubData);
 
-        IMenu subtitleSubMenu = findMenuByID("subtitleSub");
+
+        //字幕列表
+        IMenu subtitleSubMenu = findMenuByID(MenuIDConst.ID_MENU_SUBTITLE_SUB);
         MenuBean subtitleSubData = subtitleSubMenu.getData();
-        int index=0;
         for (MenuParams.MTrackInfo mTrackInfo : params.internalSubtitleList) {
-            MenuBean.MenuItemBean itemBean = new MenuBean.MenuItemBean();
-            itemBean.itemType = MenuBean.MenuItemBean.ItemType.radiobutton;
-            itemBean.itemName = mTrackInfo.trackName;
-            itemBean.itemParams = new String[]{Constant.ACTION_SUBTITLE_CHANGED,
-                    mTrackInfo.selected ? "true" : "false", "0"};
-
-            //取消无字幕
             if (mTrackInfo.selected) {
-                subtitleSubData.items.get(0).itemParams = new String[]{Constant.ACTION_SUBTITLE_CHANGED, "false", "0"};
+                //如果有字幕被选中,去除"无字幕"的选中状态
+                subtitleSubData.getItemByID(MenuIDConst.ID_ITEM_NO_SUBTITLE).itemParams
+                        = new String[]{Constant.ACTION_SUBTITLE_CHANGED, "false", SUBTITLE_RADIO_ID};
             }
+            MenuBean.MenuItemBean itemBean = getSubItem(mTrackInfo.trackName, mTrackInfo.selected,
+                    true, String.valueOf(mTrackInfo.trackIndex));
 
-            Map<String, String> itemParams = new HashMap<>();
-            itemParams.put(Constant.KEY_PARAMS_SUBTITLE, String.valueOf(mTrackInfo.trackIndex));
-            itemBean.itemParamsKV.add(itemParams);
-            itemBean.itemID = String.valueOf(mTrackInfo.trackIndex);
-            subtitleSubData.items.add(index+1, itemBean);
-            index++;
+            subtitleSubData.items.add(++subtitleIndex, itemBean);
+
         }
         subtitleSubMenu.setData(subtitleSubData);
 
     }
 
-    private void updateSubtitle() {
-        MenuBean menuBean = findMenuByID("subtitleSub").getData();
-        //修改bean,加入item后
+    private MenuBean.MenuItemBean getSubItem(String name, boolean selected,
+                                             boolean internal, String id) {
+        MenuBean.MenuItemBean itemBean = new MenuBean.MenuItemBean.Builder()
+                .setItemType(MenuBean.MenuItemBean.ItemType.radiobutton)
+                .setItemName(name)
+                .setItemID(id)
+                .setRadioButtonParam(Constant.ACTION_SUBTITLE_CHANGED, selected, SUBTITLE_RADIO_ID)
+                .addParamKV(0, Constant.KEY_PARAMS_SUBTITLE_TYPE,
+                        internal ? Constant.VALUE_PARAMS_SUBTITLE_TYPE_INTERNAL : Constant.VALUE_PARAMS_SUBTITLE_TYPE_EXTERNAL)
+                .addParamKV(0, Constant.KEY_PARAMS_SUBTITLE_ID, id)
+                .build();
+        return itemBean;
+    }
 
-        findMenuByID("subtitleSub").setData(menuBean);
+    public void addSubtitle(String name, String path) {
+        MenuBean menuBean = findMenuByID(MenuIDConst.ID_MENU_SUBTITLE_SUB).getData();
+        //修改bean,加入item后
+        MenuBean.MenuItemBean itemBean = getSubItem(name, false, false, path);
+        menuBean.items.add(++subtitleIndex, itemBean);
+
+        findMenuByID(MenuIDConst.ID_MENU_SUBTITLE_SUB).setData(menuBean);
 
     }
 
@@ -329,14 +343,14 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
 
     @Override
     public void onSuperMenu(IMenu iMenu) {
-        if (iMenu.getData().menuID.equals("0")) {
+        if (iMenu.getData().menuID.equals(MenuIDConst.ID_MENU_ROOT)) {
             dismiss();
         } else {
             currentMenuView.onDismiss();
             currentMenuView = findMenuByID(iMenu.getData().superMenuID);
             currentMenuView.onComeback();
             setTile(findMenuByID(iMenu.getData().superMenuID).getData().menuName);
-            if (currentMenuView.getData().menuID.equals("0")) {
+            if (currentMenuView.getData().menuID.equals(MenuIDConst.ID_MENU_ROOT)) {
                 hideLeftArrow();
             }
         }
@@ -401,6 +415,7 @@ public class MenuLeftFragment extends Fragment implements IMenu.OnKeyListener {
 
     public interface MenuEventListener {
         void onClose();
+
         void onShow();
     }
 }

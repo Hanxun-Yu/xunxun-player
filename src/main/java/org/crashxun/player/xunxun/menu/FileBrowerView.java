@@ -25,6 +25,7 @@ import android.widget.TextView;
 import org.crashxun.player.R;
 import org.crashxun.player.xunxun.ViewIDUtil;
 import org.crashxun.player.xunxun.common.Constant;
+import org.crashxun.player.xunxun.common.MenuIDConst;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,13 +126,13 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
                 }
 
                 if (item.itemID != null) {
-                    if (item.itemID.equals("subtitle"))
+                    if (item.itemID.equals(MenuIDConst.ID_ITEM_SUBTITLE))
                         btn.setLeftIcon(R.drawable.icon_subtitle_normal);
-                    else if (item.itemID.equals("audio"))
+                    else if (item.itemID.equals(MenuIDConst.ID_ITEM_AUDIO))
                         btn.setLeftIcon(R.drawable.icon_audio_track_normal);
-                    else if (item.itemID.equals("ratio"))
+                    else if (item.itemID.equals(MenuIDConst.ID_ITEM_RATIO))
                         btn.setLeftIcon(R.drawable.icon_aspect_ratio_normal);
-                    else if (item.itemID.equals("info"))
+                    else if (item.itemID.equals(MenuIDConst.ID_ITEM_INFO))
                         btn.setLeftIcon(R.drawable.icon_mc_normal);
                     else {
                         if (item.itemIcon != null)
