@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 public abstract class AbstractSubtitleParser implements ISubtitleParser {
     protected final String TAG = getClass().getSimpleName() + "_xunxun";
     private ExecutorService executorService = Executors.newCachedThreadPool();
-    protected OnStateChangedListener listener;
+    private OnStateChangedListener listener;
     private LoadRunnable loadRunnable;
     protected String path;
 
@@ -65,7 +65,11 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
         public void run() {
             isRunning = true;
             String content = FileRW.fileToString(path, getEncoder(path));
-            convertToEvent(content);
+            List<SubtitleEvent> ret = convertToEvent(content);
+            if(ret != null) {
+                if (listener != null)
+                    listener.onFinish(path, ret);
+            }
             isRunning = false;
         }
 
@@ -113,5 +117,15 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
             }
         });
         System.out.println(Arrays.toString(list.toArray()));
+    }
+
+    protected void onParseFailer(String error) {
+        if(listener != null)
+            listener.onFailed(error);
+    }
+
+    protected void onParseLoading(String path, int percent) {
+        if(listener != null)
+            listener.onLoading(path,percent);
     }
 }

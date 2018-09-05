@@ -21,8 +21,8 @@
 
     <FrameLayout
         android:id="@+id/brower"
-        android:layout_width="700px"
-        android:layout_height="700px"
+        android:layout_width="900px"
+        android:layout_height="900px"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="100px"
         android:layout_centerVertical="true"

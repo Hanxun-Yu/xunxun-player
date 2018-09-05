@@ -307,7 +307,7 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
     }
 
     private IMenu createMenuView(MenuBean bean) {
-        FileBrowerView iMenu = new FileBrowerView(getContext(), 400, 80);
+        FileBrowerView iMenu = new FileBrowerView(getContext(), 800, 80);
         iMenu.setData(bean);
         iMenu.setOnKeyListener(this);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(-2, -2);

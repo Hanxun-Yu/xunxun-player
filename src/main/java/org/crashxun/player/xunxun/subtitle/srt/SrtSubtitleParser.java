@@ -20,8 +20,10 @@ import java.util.List;
 public class SrtSubtitleParser extends AbstractSubtitleParser {
 
     public List<SubtitleEvent> convertToEvent(String allcontent) {
-        if (TextUtils.isEmpty(allcontent))
+        if (TextUtils.isEmpty(allcontent)) {
+            onParseFailer("subtitle content:null");
             return null;
+        }
 
         allcontent = allcontent.replaceAll("\r\n", "\n");
         List<SubtitleEvent> ret = new ArrayList<>();
@@ -61,10 +63,9 @@ public class SrtSubtitleParser extends AbstractSubtitleParser {
                 subtitleEventItem.setDuringMilliSec(subtitleEventItem.getEndTimeMilliSec() - subtitleEventItem.getStartTimeMilliSec());
 //            Log.d(TAG, "convertToEvent i:"+index+" t:"+time+" c:"+content);
                 ret.add(subtitleEventItem);
-                if (listener != null) {
-                    int percent = (int) (i * 100f / strArr.length) - 20;
-                    listener.onLoading(path, percent < 0 ? 0 : percent);
-                }
+
+                int percent = (int) (i * 100f / strArr.length) - 20;
+                onParseLoading(path, percent < 0 ? 0 : percent);
                 Log.d(TAG, "convertToEvent i:" + index + " subtitleEventItem:" + subtitleEventItem);
 
             }
@@ -81,17 +82,11 @@ public class SrtSubtitleParser extends AbstractSubtitleParser {
                         return 0;
                 }
             });
-            if (listener != null) {
-                listener.onLoading(path, 100);
-            }
-
-            if (listener != null)
-                listener.onFinish(path, ret);
-
+            onParseLoading(path,100);
         } catch (Exception e) {
             e.printStackTrace();
-            if (listener != null)
-                listener.onFailed(e.getMessage());
+            onParseFailer(e.getMessage());
+            ret = null;
         }
 //        Log.d(TAG, "strArr:" + Arrays.toString(strArr));
         return ret;

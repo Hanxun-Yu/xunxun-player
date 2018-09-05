@@ -272,6 +272,7 @@ public class FileBrowerView extends RelativeLayout implements IMenu {
 //            });
                 btn.setFocusable(true);
                 btn.setFocusableInTouchMode(true);
+                btn.setPadding(0,0,0,0);
                 menuItemViewList.add(btn);
                 relativeLayout.addView(btn, ll);
 
