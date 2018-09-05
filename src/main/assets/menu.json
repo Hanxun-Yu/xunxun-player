@@ -63,7 +63,7 @@
         "itemID":"subtitle_adjust",
         "itemName": "校准时间轴",
         "itemType": "activity",
-        "itemParams": ["action"]
+        "itemParams": ["org.crashxun.player.action_subtitle_time_adjust"]
       }
     ]
   },

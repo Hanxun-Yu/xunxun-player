@@ -1,6 +1,9 @@
 package org.crashxun.player.xunxun.subtitle;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -37,9 +40,11 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
     ExecutorService executorService = Executors.newCachedThreadPool();
     SubtitleGenerateRunn subtitleGenerateRunn;
     View anchorView;
+    MReceiver receiver;
 
     public XSubtitleController(Context context) {
         this.mContext = context;
+        registReceiver();
     }
 
     @Override
@@ -78,12 +83,18 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
         }
     }
 
+    //+提前 -延后
     private int adjustTimeMilliSec = 0;
 
     @Override
     public int timeAdjust(int millisecond) {
         adjustTimeMilliSec += millisecond;
         Log.d(TAG, "timeAdjust millisecond:" + millisecond + " ret:" + adjustTimeMilliSec);
+        return adjustTimeMilliSec;
+    }
+
+    @Override
+    public int getTimeAjust() {
         return adjustTimeMilliSec;
     }
 
@@ -109,7 +120,8 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
     @Override
     public void detach() {
         Log.d(TAG, "detach");
-
+        unRegistReceiver();
+        stop();
     }
 
     @Override
@@ -236,6 +248,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
 
         private boolean isEventInTime(SubtitleEvent event, long time) {
             boolean ret = false;
+            time+=adjustTimeMilliSec;
             if (event.getStartTimeMilliSec() < time && event.getEndTimeMilliSec() > time) {
                 ret = true;
             }
@@ -243,6 +256,31 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
         }
 
 
+    }
+
+
+    private void registReceiver() {
+        if(receiver == null)
+            receiver = new MReceiver();
+        IntentFilter intentFilter = new IntentFilter(ACTION_ADJUST_TIME);
+        mContext.registerReceiver(receiver,intentFilter);
+    }
+
+    private void unRegistReceiver() {
+        if(receiver != null) {
+            mContext.unregisterReceiver(receiver);
+            receiver = null;
+        }
+    }
+
+    private class MReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(ACTION_ADJUST_TIME)) {
+                int milliSecond = intent.getIntExtra(KEY_ADJUST_TIME_PARAM,0);
+                timeAdjust(milliSecond);
+            }
+        }
     }
 
 

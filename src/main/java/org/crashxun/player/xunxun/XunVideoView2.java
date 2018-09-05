@@ -17,20 +17,14 @@ package org.crashxun.player.xunxun;/*
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -42,8 +36,6 @@ import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.TableLayout;
 import android.widget.TextView;
-
-import com.google.gson.Gson;
 
 import org.crashxun.player.R;
 import org.crashxun.player.application.Settings;
@@ -507,7 +499,7 @@ public class XunVideoView2 extends FrameLayout implements MediaController.MediaP
                     if (mMediaController != null) {
                         mMediaController.hide();
                     }
-                    quitSubtitle();
+                    stopSubtitle();
                     if (mOnCompletionListener != null) {
                         mOnCompletionListener.onCompletion(mMediaPlayer);
                     }
@@ -762,6 +754,7 @@ public class XunVideoView2 extends FrameLayout implements MediaController.MediaP
      * release the media player in any state
      */
     public void release(boolean cleartargetstate) {
+        detachSubtitle();
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();
             mMediaPlayer.release();
@@ -775,7 +768,7 @@ public class XunVideoView2 extends FrameLayout implements MediaController.MediaP
             am.abandonAudioFocus(null);
         }
 
-        quitSubtitle();
+        stopSubtitle();
     }
 
     @Override
@@ -1219,11 +1212,20 @@ public class XunVideoView2 extends FrameLayout implements MediaController.MediaP
         MediaPlayerService.setMediaPlayer(null);
     }
 
-    private void quitSubtitle() {
+    private void stopSubtitle() {
         if(subtitleController != null) {
             subtitleController.stop();
         }
     }
+
+    private void detachSubtitle() {
+        if(subtitleController != null) {
+            subtitleController.detach();
+        }
+    }
+
+
+
     //-------------------------
     // Extend: Background
     //-------------------------

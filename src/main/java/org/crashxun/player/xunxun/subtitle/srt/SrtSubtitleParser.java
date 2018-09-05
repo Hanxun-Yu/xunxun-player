@@ -20,12 +20,14 @@ import java.util.List;
 public class SrtSubtitleParser extends AbstractSubtitleParser {
 
     public List<SubtitleEvent> convertToEvent(String allcontent) {
+        Log.d(TAG, "allcontent:" + allcontent);
         if (TextUtils.isEmpty(allcontent)) {
             onParseFailer("subtitle content:null");
             return null;
         }
 
-        allcontent = allcontent.replaceAll("\r\n", "\n");
+        allcontent = allcontent.replaceAll("\r\n", "\n").replaceAll("\ufeff", "");
+
         List<SubtitleEvent> ret = new ArrayList<>();
 
         //使用空行分割
@@ -44,6 +46,9 @@ public class SrtSubtitleParser extends AbstractSubtitleParser {
                 if (subArr.length > 3) {
                     for (int j = 0; j < subArr.length - 2; j++) {
                         content += subArr[j + 2];
+                        if (j != subArr.length - 2 - 1) {
+                            content += "<br>";
+                        }
                     }
                 } else {
                     content = subArr[2];
@@ -82,7 +87,7 @@ public class SrtSubtitleParser extends AbstractSubtitleParser {
                         return 0;
                 }
             });
-            onParseLoading(path,100);
+            onParseLoading(path, 100);
         } catch (Exception e) {
             e.printStackTrace();
             onParseFailer(e.getMessage());

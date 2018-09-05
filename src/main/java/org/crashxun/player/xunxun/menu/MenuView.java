@@ -71,7 +71,7 @@ public class MenuView extends RelativeLayout implements IMenu {
         menuItemViewList = new ArrayList<>();
         initLayout(menuBean, itemWidth, itemHeight);
         recoveryFocusable(null);
-        requestFocus();
+        menuItemViewList.get(0).requestFocus();
     }
 
     ScrollView scrollView;

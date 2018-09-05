@@ -79,6 +79,9 @@
             android:theme="@style/LeftMenu"
             >
         </activity>
+        <activity android:name=".xunxun.activity.SubtitleAdjustTimeActivity"
+            android:theme="@style/LeftMenu"
+            />
         <!--<activity android:name=".widget.xunxun.activity.TestActivity">-->
 
         <!--</activity>-->
