@@ -4,67 +4,22 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import org.crashxun.player.xunxun.subtitle.DateUtil;
-import org.crashxun.player.xunxun.subtitle.FileRW;
-import org.crashxun.player.xunxun.subtitle.api.ISubtitleParser;
+import org.crashxun.player.xunxun.subtitle.api.AbstractSubtitleParser;
 import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
-import org.mozilla.universalchardet.UniversalDetector;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by yuhanxun
  * 2018/9/4
  * description:
  */
-public class SrtSubtitleParser implements ISubtitleParser {
-    final String TAG = getClass().getSimpleName() + "_xunxun";
-    ExecutorService executorService = Executors.newCachedThreadPool();
-    OnStateChangedListener listener;
-    LoadRunnable loadRunnable;
-    String path;
+public class SrtSubtitleParser extends AbstractSubtitleParser {
 
-    @Override
-    public void loadFile(String path) {
-//        Log.d(TAG,"loadFile path:"+path);
-        this.path = path;
-//        if(!TextUtils.isEmpty(path)) {
-        if (loadRunnable == null || !loadRunnable.isRunning()) {
-            executorService.execute(new LoadRunnable());
-        }
-//        }
-    }
-
-    @Override
-    public void setOnStateChangedListener(OnStateChangedListener listener) {
-        this.listener = listener;
-    }
-
-    private class LoadRunnable implements Runnable {
-        boolean isRunning = false;
-
-        @Override
-        public void run() {
-            isRunning = true;
-            String content = FileRW.fileToString(path, getEncoder(path));
-//            Log.d(TAG,content);
-//            System.out.println(content);
-            convertToEvent(content);
-            isRunning = false;
-        }
-
-        public boolean isRunning() {
-            return isRunning;
-        }
-    }
-
-
-    private List<SubtitleEvent> convertToEvent(String allcontent) {
+    public List<SubtitleEvent> convertToEvent(String allcontent) {
         if (TextUtils.isEmpty(allcontent))
             return null;
 
@@ -79,8 +34,6 @@ public class SrtSubtitleParser implements ISubtitleParser {
         String content = null;
         SubtitleEvent subtitleEventItem = null;
         try {
-
-
             for (int i = 0; i < strArr.length; i++) {
                 content = "";
                 subArr = strArr[i].split("\n");
@@ -108,17 +61,32 @@ public class SrtSubtitleParser implements ISubtitleParser {
                 subtitleEventItem.setDuringMilliSec(subtitleEventItem.getEndTimeMilliSec() - subtitleEventItem.getStartTimeMilliSec());
 //            Log.d(TAG, "convertToEvent i:"+index+" t:"+time+" c:"+content);
                 ret.add(subtitleEventItem);
-                if (listener != null)
-                    listener.onLoading(path, (int) (i * 100f / strArr.length));
+                if (listener != null) {
+                    int percent = (int) (i * 100f / strArr.length) - 20;
+                    listener.onLoading(path, percent < 0 ? 0 : percent);
+                }
                 Log.d(TAG, "convertToEvent i:" + index + " subtitleEventItem:" + subtitleEventItem);
 
-
-                //排序
-                //...
+            }
+            //排序
+            //...
+            Collections.sort(ret, new Comparator<SubtitleEvent>() {
+                @Override
+                public int compare(SubtitleEvent o1, SubtitleEvent o2) {
+                    if (o1.getStartTimeMilliSec() - o2.getStartTimeMilliSec() < 0)
+                        return -1;
+                    else if (o1.getStartTimeMilliSec() - o2.getStartTimeMilliSec() > 0)
+                        return 1;
+                    else
+                        return 0;
+                }
+            });
+            if (listener != null) {
+                listener.onLoading(path, 100);
             }
 
             if (listener != null)
-                listener.onFinish(ret);
+                listener.onFinish(path, ret);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -129,36 +97,11 @@ public class SrtSubtitleParser implements ISubtitleParser {
         return ret;
     }
 
-    private String getEncoder(String path) {
-        String ret = null;
-        UniversalDetector encDetector = new UniversalDetector(null);
-        int l = 0;
-        byte[] tmp = new byte[1024];
-        try {
-            FileInputStream fileInputStream = new FileInputStream(path);
-            while ((l = fileInputStream.read(tmp)) != -1) {
-                if (!encDetector.isDone()) {
-                    encDetector.handleData(tmp, 0, l);
-                } else {
-                    break;
-                }
-            }
-            encDetector.dataEnd();
-            ret = encDetector.getDetectedCharset();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, "getEncoder path:" + path + " ret:" + ret);
-        return ret;
-    }
-
-    public static void main(String[] args) {
-        ISubtitleParser subtitleParser = new SrtSubtitleParser();
-//        subtitleParser.loadFile("C:\\Users\\yuhanxun\\Videos\\Game.of.Thrones.S01E01.srt");
-        subtitleParser.loadFile("C:\\Users\\yuhanxun\\Videos\\Game.of.Thrones.S01E10.ass");
-    }
+//    public static void main(String[] args) {
+//        ISubtitleParser subtitleParser = new SrtSubtitleParser();
+////        subtitleParser.loadFile("C:\\Users\\yuhanxun\\Videos\\Game.of.Thrones.S01E01.srt");
+//        subtitleParser.loadFile("C:\\Users\\yuhanxun\\Videos\\Game.of.Thrones.S01E10.ass");
+//    }
 
 
 }

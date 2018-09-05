@@ -20,6 +20,8 @@ public interface ISubtitleController {
     boolean isShowing();
     void detach();
 
+    void stop();
+
     void setOnStateChangedListener(OnStateChangedListener listener);
 
     interface OnStateChangedListener {

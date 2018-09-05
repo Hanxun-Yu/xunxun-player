@@ -14,6 +14,6 @@ public interface ISubtitleParser {
     interface OnStateChangedListener {
         void onLoading(String path, int percent);
         void onFailed(String msg);
-        void onFinish(List<SubtitleEvent> events);
+        void onFinish(String path,List<SubtitleEvent> events);
     }
 }
