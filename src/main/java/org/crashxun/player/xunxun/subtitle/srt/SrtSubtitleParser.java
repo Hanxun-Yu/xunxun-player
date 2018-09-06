@@ -26,6 +26,7 @@ public class SrtSubtitleParser extends AbstractSubtitleParser {
             return null;
         }
 
+        //unify various 'enter' character, clear 'utf-16' serial character
         allcontent = allcontent.replaceAll("\r\n", "\n").replaceAll("\ufeff", "");
 
         List<SubtitleEvent> ret = new ArrayList<>();
