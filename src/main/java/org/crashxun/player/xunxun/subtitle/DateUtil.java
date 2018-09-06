@@ -325,6 +325,22 @@ public class DateUtil {
 	}
 
 	/**
+	 * 设置过时区,格式转毫秒,时区0
+	 */
+	public static long convertTimeNoYMD2ms2(String time) {
+		long ms = 0L;
+		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss.SSS");
+		try {
+			sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+			Date date = sdf.parse(time);
+			ms = date.getTime();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return ms;
+	}
+
+	/**
 	 * convert time to long
 	 *
 	 * @param time

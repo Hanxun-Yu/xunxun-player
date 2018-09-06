@@ -66,7 +66,7 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
             isRunning = true;
             String content = FileRW.fileToString(path, getEncoder(path));
             List<SubtitleEvent> ret = convertToEvent(content);
-            if(ret != null) {
+            if (ret != null) {
                 if (listener != null)
                     listener.onFinish(path, ret);
             }
@@ -105,7 +105,55 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
 
     protected abstract List<SubtitleEvent> convertToEvent(String str);
 
+
+    protected void onParseFailer(String error) {
+        if (listener != null)
+            listener.onFailed(error);
+    }
+
+    protected void onParseLoading(String path, int percent) {
+        if (listener != null)
+            listener.onLoading(path, percent);
+    }
+
+    protected int string2Int(String str) {
+        return (int) string2Float(str);
+    }
+
+    protected double string2Double(String str) {
+        double ret = 0d;
+        if (str != null && !str.equals("")) {
+            str = str.replaceAll(" ", "");
+            ret = Double.parseDouble(str);
+        }
+        return ret;
+    }
+
+    protected float string2Float(String str) {
+        float ret = 0f;
+        if (str != null && !str.equals("")) {
+            str = str.replaceAll(" ", "");
+            ret = Float.parseFloat(str);
+        }
+        return ret;
+    }
+
+
     public static void main(String[] args) {
+        testTypeConvert(" 1.");
+    }
+
+    private static void testTypeConvert(String str) {
+        int ret = 0;
+        if (str != null && !str.equals("")) {
+            str = str.replaceAll(" ", "");
+            ret = (int) Double.parseDouble(str);
+        }
+        System.out.println(ret);
+
+    }
+
+    private static void testListsort() {
         List<Integer> list = new ArrayList<>();
         list.add(5);
         list.add(8);
@@ -117,15 +165,5 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
             }
         });
         System.out.println(Arrays.toString(list.toArray()));
-    }
-
-    protected void onParseFailer(String error) {
-        if(listener != null)
-            listener.onFailed(error);
-    }
-
-    protected void onParseLoading(String path, int percent) {
-        if(listener != null)
-            listener.onLoading(path,percent);
     }
 }

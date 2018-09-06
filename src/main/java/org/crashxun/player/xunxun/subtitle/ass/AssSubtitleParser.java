@@ -3,12 +3,14 @@ package org.crashxun.player.xunxun.subtitle.ass;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.crashxun.player.xunxun.subtitle.DateUtil;
 import org.crashxun.player.xunxun.subtitle.api.AbstractSubtitleParser;
 import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 //@formatter:off
@@ -30,10 +32,163 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
         //unify various 'enter' character, clear 'utf-16' serial character
         allcontent = allcontent.replaceAll("\r\n", "\n").replaceAll("\ufeff", "");
 
-
+        List<SubtitleEvent> ret = null;
         //fetch 3 S,V4,E tag content java object
+        AssTag assTag = getAssTag(allcontent);
+        try {
+            if (assTag != null) {
+                ret = new ArrayList<>();
+                //获取全局宽高
+                int subScreenWidth = string2Int(assTag.getS().getPlayResX());
+                int subScreenHeight = string2Int(assTag.getS().getPlayResY());
 
-        return null;
+                SubtitleEvent subtitleEvent = null;
+                AssTagEvent.Dialogue dialogue = null;
+                AssTagV4Style.Style style = null;
+                int index = 0;
+                for (int i = 0; i < assTag.getE().getDialogues().size(); i++) {
+                    dialogue = assTag.getE().getDialogues().get(i);
+                    //目前先1个Dialogue = 1个事件
+                    subtitleEvent = new SubtitleEvent();
+                    subtitleEvent.setBaseScreenWidth(subScreenWidth);
+                    subtitleEvent.setBaseScreenHeight(subScreenHeight);
+
+                    //字大小,颜色,粗,斜,下划线,删除线,间距,角度
+                    style = findStyle(assTag.getV(), dialogue.getStyle());
+                    subtitleEvent.setFontName(style.getFontname());
+                    subtitleEvent.setFontSize(string2Int(style.getFontsize()));
+                    subtitleEvent.setPrimaryColor(getColor(style.getPrimaryColour()));
+                    subtitleEvent.setSecondColor(getColor(style.getSecondaryColour()));
+                    subtitleEvent.setShadowColor(getColor(style.getBackColour()));
+                    subtitleEvent.setBold(isStyleOpen(style.getBold()));
+                    subtitleEvent.setItalic(isStyleOpen(style.getItalic()));
+                    subtitleEvent.setUnderline(isStyleOpen(style.getUnderline()));
+                    subtitleEvent.setStrikeOut(isStyleOpen(style.getStrikeOut()));
+                    subtitleEvent.setSpacing(string2Int(style.getSpacing()));
+                    subtitleEvent.setAngle(string2Float(style.getAngle()));
+                    //scaleX,scaleY
+                    //...
+
+                    //边框,颜色
+                    subtitleEvent.setBorderColor(getColor(style.getOutlineColour()));
+                    subtitleEvent.setBorderStyle(string2Int(
+                            style.getBorderStyle()) == 1 ?
+                            SubtitleEvent.BorderStyle.ShadowBorder
+                            : SubtitleEvent.BorderStyle.NormalBorder);
+                    subtitleEvent.setBorderWidth(string2Int(style.getOutline()));
+                    subtitleEvent.setBorderShadowWidth(string2Int(style.getShadow()));
+                    subtitleEvent.setAlignment(getAligment(style.getAlignment()));
+
+
+                    //获取字位置
+//                subtitleEvent.setPosiX();
+//                subtitleEvent.setPosiY();
+                    subtitleEvent.setMarginLeft(string2Int(style.getMarginL()));
+                    subtitleEvent.setMarginRight(string2Int(style.getMarginR()));
+                    subtitleEvent.setMarginVertical(string2Int(style.getMarginV()));
+
+                    //获取时间
+                    subtitleEvent.setStartTimeText(dialogue.getStart());
+                    subtitleEvent.setEndTimeText(dialogue.getEnd());
+                    subtitleEvent.setStartTimeMilliSec(DateUtil.convertTimeNoYMD2ms2(dialogue.getStart() + "0"));
+                    subtitleEvent.setEndTimeMilliSec(DateUtil.convertTimeNoYMD2ms2(dialogue.getEnd() + "0"));
+                    subtitleEvent.setDuringMilliSec(subtitleEvent.getEndTimeMilliSec()-subtitleEvent.getStartTimeMilliSec());
+
+                    //获取每行文字
+                    subtitleEvent.setText(dialogue.getText().replaceAll("[{]","")
+                    .replaceAll("[}]","")
+                    .replaceAll("\\\\",""));
+                    //动画
+                    //...
+
+                    subtitleEvent.setIndex(index++);
+                    ret.add(subtitleEvent);
+
+                    int percent = (int) (i * 100f / assTag.getE().getDialogues().size() - 20);
+                    onParseLoading(path, percent < 0 ? 0 : percent);
+                    Log.d(TAG, "convertToEvent i:" + i + " subtitleEventItem:" + subtitleEvent);
+                }
+                //排序
+                //...
+                Collections.sort(ret, new Comparator<SubtitleEvent>() {
+                    @Override
+                    public int compare(SubtitleEvent o1, SubtitleEvent o2) {
+                        if (o1.getStartTimeMilliSec() - o2.getStartTimeMilliSec() < 0)
+                            return -1;
+                        else if (o1.getStartTimeMilliSec() - o2.getStartTimeMilliSec() > 0)
+                            return 1;
+                        else
+                            return 0;
+                    }
+                });
+                onParseLoading(path, 100);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            onParseFailer(e.getMessage());
+            ret = null;
+        }
+
+        return ret;
+    }
+
+    private boolean isStyleOpen(String val) {
+        boolean ret = false;
+        if (val != null) {
+            ret = val.equals(VAL_ATTR_VS_ON);
+        }
+        return ret;
+    }
+
+
+    private String getColor(String color) {
+        String ret = null;
+        if (color != null && !color.equals("")) {
+            if (color.length() == 8) {
+                ret = "#FF" + color.substring(2);
+            } else if (color.length() == 10) {
+                ret = "#" + color.substring(2);
+            }
+        }
+        return ret;
+    }
+
+    private SubtitleEvent.Alignment getAligment(String val) {
+        SubtitleEvent.Alignment ret = null;
+        if (val != null) {
+            if (val.equals(VAL_ATTR_VS_Alignment_LeftBottom))
+                ret = SubtitleEvent.Alignment.LeftBottom;
+            else if (val.equals(VAL_ATTR_VS_Alignment_Bottom))
+                ret = SubtitleEvent.Alignment.Bottom;
+            else if (val.equals(VAL_ATTR_VS_Alignment_RightBottom))
+                ret = SubtitleEvent.Alignment.RightBottom;
+            else if (val.equals(VAL_ATTR_VS_Alignment_Left))
+                ret = SubtitleEvent.Alignment.Left;
+            else if (val.equals(VAL_ATTR_VS_Alignment_Center))
+                ret = SubtitleEvent.Alignment.Center;
+            else if (val.equals(VAL_ATTR_VS_Alignment_Right))
+                ret = SubtitleEvent.Alignment.Right;
+            else if (val.equals(VAL_ATTR_VS_Alignment_LeftTop))
+                ret = SubtitleEvent.Alignment.LeftTop;
+            else if (val.equals(VAL_ATTR_VS_Alignment_Top))
+                ret = SubtitleEvent.Alignment.Top;
+            else if (val.equals(VAL_ATTR_VS_Alignment_RightTop))
+                ret = SubtitleEvent.Alignment.RightTop;
+        }
+        return ret;
+    }
+
+    private AssTagV4Style.Style findStyle(AssTagV4Style ats, String styleName) {
+        AssTagV4Style.Style ret = null;
+        if (ats != null && ats.getStyles() != null && !ats.getStyles().isEmpty()) {
+            for (int i = 0; i < ats.getStyles().size(); i++) {
+                if (ats.getStyles().get(i).getName().equals(styleName)) {
+                    ret = ats.getStyles().get(i);
+                    break;
+                }
+            }
+        }
+        return ret;
     }
 
     private AssTag getAssTag(String allcontent) {
@@ -163,20 +318,23 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                     List<String> valList = new ArrayList<>();
                     boolean found = false;
                     StringBuffer sb = new StringBuffer();
+//                    Log.d(TAG,"valArr:"+valArr.length+":"+Arrays.toString(valArr));
                     for (int j = 0; j < valArr.length; j++) {
-                        if(valArr[j].contains("{")) {
+                        if (valArr[j].contains("{")) {
                             found = true;
                         }
-                        if(!found) {
+                        if (!found) {
                             valList.add(valArr[j]);
                         } else {
                             sb.append(valArr[j]);
-                            if(j != valArr.length -1) {
+                            if (j != valArr.length - 1) {
                                 sb.append(",");
                             }
                         }
                     }
-                    valList.add(sb.toString());
+                    if(found) {
+                        valList.add(sb.toString());
+                    }
                     dialogueList.add(getDialogue(formatNameArr, valList));
                 }
             }

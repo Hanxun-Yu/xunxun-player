@@ -16,6 +16,7 @@ import org.crashxun.player.xunxun.subtitle.api.ISubtitleController;
 import org.crashxun.player.xunxun.subtitle.api.ISubtitleParser;
 import org.crashxun.player.xunxun.subtitle.api.ISubtitleRender;
 import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
+import org.crashxun.player.xunxun.subtitle.ass.AssSubtitleParser;
 import org.crashxun.player.xunxun.subtitle.srt.SrtSubtitleParser;
 import org.crashxun.player.xunxun.subtitle.srt.SrtSubtitleRender;
 
@@ -73,10 +74,12 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
             if (path.toLowerCase().endsWith(".srt")) {
                 subtitleParser = new SrtSubtitleParser();
                 subtitleRender = new SrtSubtitleRender();
-                subtitleRender.attach(anchorView);
             } else if (path.toLowerCase().endsWith(".ass")) {
-
+                subtitleParser = new AssSubtitleParser();
+                subtitleRender = new SrtSubtitleRender();
             }
+            subtitleRender.attach(anchorView);
+
             curSubtitlePath = path;
             subtitleParser.setOnStateChangedListener(this);
             subtitleParser.loadFile(path);
