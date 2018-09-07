@@ -382,4 +382,15 @@ public class SubtitleEvent {
                 ", duringMilliSec=" + duringMilliSec +
                 '}';
     }
+
+
+    public SubtitleEvent clone() {
+        SubtitleEvent o = null;
+        try {
+            o = (SubtitleEvent) super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println(e.toString());
+        }
+        return o;
+    }
 }

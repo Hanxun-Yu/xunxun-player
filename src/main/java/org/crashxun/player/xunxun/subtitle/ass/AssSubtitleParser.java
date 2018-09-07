@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 //@formatter:off
 
@@ -92,12 +94,12 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                     subtitleEvent.setEndTimeText(dialogue.getEnd());
                     subtitleEvent.setStartTimeMilliSec(DateUtil.convertTimeNoYMD2ms2(dialogue.getStart() + "0"));
                     subtitleEvent.setEndTimeMilliSec(DateUtil.convertTimeNoYMD2ms2(dialogue.getEnd() + "0"));
-                    subtitleEvent.setDuringMilliSec(subtitleEvent.getEndTimeMilliSec()-subtitleEvent.getStartTimeMilliSec());
+                    subtitleEvent.setDuringMilliSec(subtitleEvent.getEndTimeMilliSec() - subtitleEvent.getStartTimeMilliSec());
 
                     //获取每行文字
-                    subtitleEvent.setText(dialogue.getText().replaceAll("[{]","")
-                    .replaceAll("[}]","")
-                    .replaceAll("\\\\",""));
+                    subtitleEvent.setText(dialogue.getText().replaceAll("[{]", "")
+                            .replaceAll("[}]", "")
+                            .replaceAll("\\\\", ""));
                     //动画
                     //...
 
@@ -332,7 +334,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                             }
                         }
                     }
-                    if(found) {
+                    if (found) {
                         valList.add(sb.toString());
                     }
                     dialogueList.add(getDialogue(formatNameArr, valList));
@@ -495,6 +497,187 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
         return ret;
     }
 
+
+    private List<SubtitleEvent> parseText(SubtitleEvent event, String text) {
+        List<SubtitleEvent> ret = new ArrayList<>();
+        //分离text,分类,排序
+        List<TextIndex> textIndices = getTextIndexList(text);
+
+        //遍历,发现style就赋值,发现text,先clone一个事件赋值text,add list
+        SubtitleEvent cloneEvent = null;
+        TextIndex textIndex = null;
+        for (int i = 0; i < textIndices.size(); i++) {
+            textIndex = textIndices.get(i);
+            if (textIndex.type == TextIndex.Type.Style) {
+                //解析style
+                parseTextStyle(event, textIndex.text);
+            } else if (textIndex.type == TextIndex.Type.Text) {
+                cloneEvent = event.clone();
+                cloneEvent.setText(textIndex.text);
+                ret.add(cloneEvent);
+            }
+        }
+        return ret;
+    }
+
+    private void parseTextStyle(SubtitleEvent event, String textStyle) {
+        //先把\t干掉
+//        Pattern pattern = Pattern.compile("(?:\\\\t)(.+?)(?:\\))");
+//        Matcher matcher = pattern.matcher(textStyle);
+//        while(matcher.find()) {
+//
+//        }
+        //先把\t干掉
+        while (textStyle.contains(OS_Anim_DynamicOS)) {
+            int start = textStyle.indexOf(OS_Anim_DynamicOS);
+            int foundLeftBracket = 0;
+            int foundRightBracket = 0;
+            int end = 0;
+            for (int i = start; i < textStyle.length(); i++) {
+                if (textStyle.charAt(i) == '(')
+                    foundLeftBracket++;
+                if (textStyle.charAt(i) == ')')
+                    foundRightBracket++;
+                if (foundLeftBracket != 0 && foundLeftBracket == foundRightBracket) {
+                    end = i;
+                    break;
+                }
+            }
+            textStyle = textStyle.substring(0, start) + textStyle.substring(end + 1);
+        }
+
+        if (textStyle.trim().length() == 0) {
+            return;
+        }
+
+        //反斜杠分割
+        String[] styleArr = textStyle.split("\\\\");
+        String styleStr = null;
+        for (int i = 0; i < styleArr.length; i++) {
+            if (styleArr[i].trim().length() == 0)
+                continue;
+            styleStr = "\\" + styleArr[i];
+            if (styleStr.startsWith(OS_Anim_FadeSimple)) {
+                //\fad(222,222)
+            } if (styleStr.startsWith(OS_Anim_Fade)) {
+                //\fade(0.0,1.0,0.0,500,500,500,500)范围0-255
+            } else if (styleStr.startsWith(OS_Anim_Move)) {
+                //\move(380,235,380,240)
+            } else if (styleStr.startsWith(OS_FontName)) {
+                //\fn微软雅黑
+            } else if (styleStr.startsWith(OS_FontSize)) {
+                //\fs56.267
+            } else if (styleStr.startsWith(OS_Text_Bold)) {
+                //\b<0/1>
+            } else if (styleStr.startsWith(OS_Text_Italic)) {
+                //\i<0/1>
+            } else if (styleStr.startsWith(OS_Text_Underline)) {
+                //这里多打了一个反斜杠\\u <0/1>
+            } else if (styleStr.startsWith(OS_Text_Deleteline)) {
+                //\s <0/1>  删除线（0=关闭，1=开启）
+            } else if (styleStr.startsWith(OS_Text_Gradient)) {
+                //\fa<x,y><degrees>  \fax-0.5 等同于斜体，一般不要超过±2
+            } else if (styleStr.startsWith(OS_BordWidth)) {
+                //\bord[<x,y>]<width> \bord0 \bordx2 \bordy3
+            } else if (styleStr.startsWith(OS_ShadowDepth)) {
+                //\shad[<x,y>]<depth> 阴影深度
+            } else if (styleStr.startsWith(OS_Color_Primary)
+                    || styleStr.startsWith(OS_Color_Primary2)) {
+                //\c&H<bbggrr>& || \1c&H<bbggrr>&  可能末尾没有&
+            } else if (styleStr.startsWith(OS_Color_Secondary)) {
+                //\2c&H<bbggrr>&
+            } else if (styleStr.startsWith(OS_Color_Border)) {
+                //\3c&H<bbggrr>&
+            } else if (styleStr.startsWith(OS_Color_Shadow)) {
+                //\4c&H<bbggrr>&
+            } else if (styleStr.startsWith(OS_Alpha_All)) {
+                //\alpha&H<aa>&
+
+            } else if (styleStr.startsWith(OS_Alpha_Primary)) {
+                //\1a&H<aa>&
+            } else if (styleStr.startsWith(OS_Alpha_Secondary)) {
+                //\2a&H<aa>&
+            } else if (styleStr.startsWith(OS_Alpha_Border)) {
+                //\3a&H<aa>&
+            } else if (styleStr.startsWith(OS_Alpha_Shadow)) {
+                //\4a&H<aa>&
+            } else if (styleStr.startsWith(OS_Align)) {
+                //\an<alignment> 类似小键盘
+            } else if (styleStr.startsWith(OS_Position)) {
+                //\pos(200,200)
+            }  else {
+                Log.d(TAG,"TextStyle not support:"+styleStr);
+            }
+        }
+
+
+        System.out.println(textStyle);
+    }
+
+    private List<TextIndex> getTextIndexList(String text) {
+        List<TextIndex> textIndices = new ArrayList<>();
+        TextIndex textIndex = null;
+        //{}内
+        Pattern pattern = Pattern.compile("(?<=\\{)(.+?)(?=\\})");
+        Matcher matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            textIndex = new TextIndex();
+            textIndex.text = matcher.group();
+            textIndex.start = matcher.start();
+            textIndex.end = matcher.end();
+            textIndex.type = TextIndex.Type.Style;
+//            ls.add(matcher.group());
+//            System.out.println(matcher.group() + " s:" + matcher.start() + " e:" + matcher.end());
+            textIndices.add(textIndex);
+        }
+        //{}外
+        pattern = Pattern.compile("(?<=\\})([^{]+)(?!=\\{)");
+        matcher = pattern.matcher(text);
+
+        while (matcher.find()) {
+//            ls.add(matcher.group());
+            //过滤空格串
+            if (matcher.group().trim().length() == 0)
+                continue;
+            textIndex = new TextIndex();
+            textIndex.text = matcher.group();
+            textIndex.start = matcher.start();
+            textIndex.end = matcher.end();
+            textIndex.type = TextIndex.Type.Text;
+            textIndices.add(textIndex);
+//            System.out.println(matcher.group() + " s:" + matcher.start() + " e:" + matcher.end());
+        }
+        Collections.sort(textIndices, new Comparator<TextIndex>() {
+            @Override
+            public int compare(TextIndex o1, TextIndex o2) {
+                return o1.start - o2.start;
+            }
+        });
+        return textIndices;
+    }
+
+    private static class TextIndex {
+        enum Type {
+            Style,
+            Text
+        }
+
+        String text;
+        int start;
+        int end;
+        Type type;
+
+        @Override
+        public String toString() {
+            return "TextIndex{" +
+                    "text='" + text + '\'' +
+                    ", start=" + start +
+                    ", end=" + end +
+                    ", type=" + type +
+                    '}';
+        }
+    }
+
     public static void main(String[] args) {
         String haha = "dw,dw,,a,";
 //        System.out.println(haha.split(",").length);
@@ -507,10 +690,63 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
 //        System.out.println(ats);
 //        AssTagV4Style ats = asp.getAssTagV4Style(getAllContent());
 //        System.out.println(ats);
-        AssTagEvent ats = asp.getAssTagEvent(getAllContent());
-        System.out.println(ats);
+//        AssTagEvent ats = asp.getAssTagEvent(getAllContent());
+//        System.out.println(ats);
 
+//        testPattern();
+        testGetTextIndex();
     }
+
+    private static void testGetTextIndex() {
+        AssSubtitleParser asp = new AssSubtitleParser();
+        String test = "{\\fad(300,500)\\frx360\\t(20,200,\\frx0(aa,bb))\\pos(320,250)\\fs25\\b1}君临{\\b0\\fs12} King's Landing{\\dw\\t(20,200,\\frx2(aa,bb))\\}dwad{\\dw}";
+        List<TextIndex> textIndices = asp.getTextIndexList(test);
+        System.out.println(textIndices);
+        for (int i = 0; i < textIndices.size(); i++) {
+            TextIndex textIndex = textIndices.get(i);
+            if (textIndex.type == TextIndex.Type.Style) {
+                //解析style
+                asp.parseTextStyle(null, textIndex.text);
+            }
+        }
+    }
+
+    private static void testPattern() {
+        //找到非}\\s+\\{
+        String test = "{\\fad(300,500)\\frx360\\t(20,200,\\frx0)\\pos(320,250)\\fs25\\b1}君临{\\b0\\fs12} King's Landing";
+
+
+        List<String> ls = new ArrayList<String>();
+
+        //{}内
+        Pattern pattern = Pattern.compile("(?<=\\{)(.+?)(?=\\})");
+        Matcher matcher = pattern.matcher(test);
+
+        while (matcher.find()) {
+//            ls.add(matcher.group());
+            System.out.println(matcher.group() + " s:" + matcher.start() + " e:" + matcher.end());
+        }
+        //{}外
+        pattern = Pattern.compile("(?<=\\})([^{]+)(?!=\\{)");
+        matcher = pattern.matcher(test);
+
+        while (matcher.find()) {
+//            ls.add(matcher.group());
+            System.out.println(matcher.group() + " s:" + matcher.start() + " e:" + matcher.end());
+        }
+        //找到}  {,}{
+//        Pattern pattern = Pattern.compile("(?:\\})(?:\\s+|)(?:\\{)");
+
+//        ("(?:\\})(?:\\s+|)(?:.+)(?:\\s+|)(?:\\{)")
+
+        //找到所有{xx}区间内容,解析成样式
+        //找到所有}xx{区间内容,包括}xx,去除纯空项
+        //
+
+
+//        System.out.println(ls);
+    }
+
 
     private static String getAllContent() {
         return "[Script Info]\n" +
