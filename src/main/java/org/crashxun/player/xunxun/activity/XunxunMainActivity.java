@@ -217,14 +217,14 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-//        mHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                animateLogo();
-//
-//            }
-//        }, 1000);
-        f.setUserVisibleHint(true);
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                animateLogo();
+
+            }
+        }, 1000);
+//        f.setUserVisibleHint(true);
 
     }
 

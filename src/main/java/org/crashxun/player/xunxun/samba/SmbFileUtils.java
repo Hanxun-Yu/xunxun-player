@@ -93,7 +93,7 @@ public class SmbFileUtils {
 
         NtlmPasswordAuthentication mAuthentication = new NtlmPasswordAuthentication(IP, username, password);
         try {
-            SmbSession.logon(check(IP, null), mAuthentication);
+            SmbSession.logon(check(IP, null),139, mAuthentication);
         } catch (SmbAuthException e) {
             e.printStackTrace();
             Log.e(TAG, "用户名密码错误");

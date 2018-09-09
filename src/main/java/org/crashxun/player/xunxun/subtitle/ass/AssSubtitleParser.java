@@ -3,6 +3,7 @@ package org.crashxun.player.xunxun.subtitle.ass;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.crashxun.player.xunxun.activity.SubtitleAdjustTimeActivity;
 import org.crashxun.player.xunxun.subtitle.DateUtil;
 import org.crashxun.player.xunxun.subtitle.api.AbstractSubtitleParser;
 import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
@@ -25,7 +26,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
 
 
     @Override
-    protected List<SubtitleEvent> convertToEvent(String allcontent) {
+    protected List<? extends SubtitleEvent> convertToEvent(String allcontent) {
         Log.d(TAG, "allcontent:" + allcontent);
         if (TextUtils.isEmpty(allcontent)) {
             onParseFailer("subtitle content:null");
@@ -44,41 +45,47 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                 int subScreenWidth = string2Int(assTag.getS().getPlayResX());
                 int subScreenHeight = string2Int(assTag.getS().getPlayResY());
 
-                SubtitleEvent subtitleEvent = null;
+                AssSubtitleEvent subtitleEvent = null;
+                AssSubtitleEvent.TextStyle parentStyle = null;
+                AssSubtitleEvent.Anim parentAnim = null;
                 AssTagEvent.Dialogue dialogue = null;
                 AssTagV4Style.Style style = null;
+
+
                 int index = 0;
+                int line = 0;
                 for (int i = 0; i < assTag.getE().getDialogues().size(); i++) {
                     dialogue = assTag.getE().getDialogues().get(i);
                     //目前先1个Dialogue = 1个事件
-                    subtitleEvent = new SubtitleEvent();
+                    subtitleEvent = new AssSubtitleEvent();
+                    parentStyle = new AssSubtitleEvent.TextStyle();
                     subtitleEvent.setBaseScreenWidth(subScreenWidth);
                     subtitleEvent.setBaseScreenHeight(subScreenHeight);
 
                     //字大小,颜色,粗,斜,下划线,删除线,间距,角度
                     style = findStyle(assTag.getV(), dialogue.getStyle());
-                    subtitleEvent.setFontName(style.getFontname());
-                    subtitleEvent.setFontSize(string2Int(style.getFontsize()));
-                    subtitleEvent.setPrimaryColor(getColor(style.getPrimaryColour()));
-                    subtitleEvent.setSecondColor(getColor(style.getSecondaryColour()));
-                    subtitleEvent.setShadowColor(getColor(style.getBackColour()));
-                    subtitleEvent.setBold(isStyleOpen(style.getBold()));
-                    subtitleEvent.setItalic(isStyleOpen(style.getItalic()));
-                    subtitleEvent.setUnderline(isStyleOpen(style.getUnderline()));
-                    subtitleEvent.setStrikeOut(isStyleOpen(style.getStrikeOut()));
-                    subtitleEvent.setSpacing(string2Int(style.getSpacing()));
-                    subtitleEvent.setAngle(string2Float(style.getAngle()));
+                    parentStyle.setFontName(style.getFontname());
+                    parentStyle.setFontSize(string2Int(style.getFontsize()));
+                    parentStyle.setPrimaryColor(getColor(style.getPrimaryColour()));
+                    parentStyle.setSecondColor(getColor(style.getSecondaryColour()));
+                    parentStyle.setShadowColor(getColor(style.getBackColour()));
+                    parentStyle.setBold(isStyleOpen(style.getBold()));
+                    parentStyle.setItalic(isStyleOpen(style.getItalic()));
+                    parentStyle.setUnderline(isStyleOpen(style.getUnderline()));
+                    parentStyle.setStrikeOut(isStyleOpen(style.getStrikeOut()));
+                    parentStyle.setSpacing(string2Int(style.getSpacing()));
+                    parentStyle.setAngle(string2Float(style.getAngle()));
                     //scaleX,scaleY
                     //...
 
                     //边框,颜色
-                    subtitleEvent.setBorderColor(getColor(style.getOutlineColour()));
-                    subtitleEvent.setBorderStyle(string2Int(
+                    parentStyle.setBorderColor(getColor(style.getOutlineColour()));
+                    parentStyle.setBorderStyle(string2Int(
                             style.getBorderStyle()) == 1 ?
-                            SubtitleEvent.BorderStyle.ShadowBorder
-                            : SubtitleEvent.BorderStyle.NormalBorder);
-                    subtitleEvent.setBorderWidth(string2Int(style.getOutline()));
-                    subtitleEvent.setBorderShadowWidth(string2Int(style.getShadow()));
+                            AssSubtitleEvent.TextStyle.BorderStyle.ShadowBorder
+                            : AssSubtitleEvent.TextStyle.BorderStyle.NormalBorder);
+                    parentStyle.setBorderWidth(string2Int(style.getOutline()));
+                    parentStyle.setBorderShadowWidth(string2Int(style.getShadow()));
                     subtitleEvent.setAlignment(getAligment(style.getAlignment()));
 
 
@@ -96,17 +103,19 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                     subtitleEvent.setEndTimeMilliSec(DateUtil.convertTimeNoYMD2ms2(dialogue.getEnd() + "0"));
                     subtitleEvent.setDuringMilliSec(subtitleEvent.getEndTimeMilliSec() - subtitleEvent.getStartTimeMilliSec());
 
+
+                    subtitleEvent.setTexts(parseText(subtitleEvent, dialogue.getText()));
                     //获取每行文字
-                    subtitleEvent.setText(dialogue.getText().replaceAll("[{]", "")
-                            .replaceAll("[}]", "")
-                            .replaceAll("\\\\", ""));
+//                    subtitleEvent.setText(dialogue.getText().replaceAll("[{]", "")
+//                            .replaceAll("[}]", "")
+//                            .replaceAll("\\\\", ""));
+                    //                    subtitleEvent.setIndex(index++);
+
                     //动画
                     //...
 
-                    subtitleEvent.setIndex(index++);
                     ret.add(subtitleEvent);
-
-                    int percent = (int) (i * 100f / assTag.getE().getDialogues().size() - 20);
+                    int percent = (int) (i * 80f / assTag.getE().getDialogues().size());
                     onParseLoading(path, percent < 0 ? 0 : percent);
                     Log.d(TAG, "convertToEvent i:" + i + " subtitleEventItem:" + subtitleEvent);
                 }
@@ -155,27 +164,27 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
         return ret;
     }
 
-    private SubtitleEvent.Alignment getAligment(String val) {
-        SubtitleEvent.Alignment ret = null;
+    private AssSubtitleEvent.Alignment getAligment(String val) {
+        AssSubtitleEvent.Alignment ret = null;
         if (val != null) {
             if (val.equals(VAL_ATTR_VS_Alignment_LeftBottom))
-                ret = SubtitleEvent.Alignment.LeftBottom;
+                ret = AssSubtitleEvent.Alignment.LeftBottom;
             else if (val.equals(VAL_ATTR_VS_Alignment_Bottom))
-                ret = SubtitleEvent.Alignment.Bottom;
+                ret = AssSubtitleEvent.Alignment.Bottom;
             else if (val.equals(VAL_ATTR_VS_Alignment_RightBottom))
-                ret = SubtitleEvent.Alignment.RightBottom;
+                ret = AssSubtitleEvent.Alignment.RightBottom;
             else if (val.equals(VAL_ATTR_VS_Alignment_Left))
-                ret = SubtitleEvent.Alignment.Left;
+                ret = AssSubtitleEvent.Alignment.Left;
             else if (val.equals(VAL_ATTR_VS_Alignment_Center))
-                ret = SubtitleEvent.Alignment.Center;
+                ret = AssSubtitleEvent.Alignment.Center;
             else if (val.equals(VAL_ATTR_VS_Alignment_Right))
-                ret = SubtitleEvent.Alignment.Right;
+                ret = AssSubtitleEvent.Alignment.Right;
             else if (val.equals(VAL_ATTR_VS_Alignment_LeftTop))
-                ret = SubtitleEvent.Alignment.LeftTop;
+                ret = AssSubtitleEvent.Alignment.LeftTop;
             else if (val.equals(VAL_ATTR_VS_Alignment_Top))
-                ret = SubtitleEvent.Alignment.Top;
+                ret = AssSubtitleEvent.Alignment.Top;
             else if (val.equals(VAL_ATTR_VS_Alignment_RightTop))
-                ret = SubtitleEvent.Alignment.RightTop;
+                ret = AssSubtitleEvent.Alignment.RightTop;
         }
         return ret;
     }
@@ -498,29 +507,57 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
     }
 
 
-    private List<SubtitleEvent> parseText(SubtitleEvent event, String text) {
-        List<SubtitleEvent> ret = new ArrayList<>();
+    /**
+     * @param event 字幕文件的一行,为一条事件
+     * @param text  一条事件内,有样式不同的内容,即多条内容,每条内容样式不同
+     * @return
+     */
+    private List<AssSubtitleEvent.Text> parseText(AssSubtitleEvent event, String text) {
+        List<AssSubtitleEvent.Text> ret = new ArrayList<>();
         //分离text,分类,排序
         List<TextIndex> textIndices = getTextIndexList(text);
 
         //遍历,发现style就赋值,发现text,先clone一个事件赋值text,add list
-        SubtitleEvent cloneEvent = null;
         TextIndex textIndex = null;
+        AssTagEventTextStyle tagEventTextStyle = null;
+
+        //文字序号
+        int textid = 0;
         for (int i = 0; i < textIndices.size(); i++) {
             textIndex = textIndices.get(i);
             if (textIndex.type == TextIndex.Type.Style) {
-                //解析style
-                parseTextStyle(event, textIndex.text);
+                if (tagEventTextStyle == null)
+                    tagEventTextStyle = new AssTagEventTextStyle();
+                //解析style, 一行只有一个style对象,解析到某个属性则覆盖
+                parseTextStyle(tagEventTextStyle, textIndex.text);
             } else if (textIndex.type == TextIndex.Type.Text) {
-                cloneEvent = event.clone();
-                cloneEvent.setText(textIndex.text);
-                ret.add(cloneEvent);
+                AssSubtitleEvent.Text textTmp = new AssSubtitleEvent.Text();
+                textTmp.setText(textIndex.text);
+                //父样式先赋值
+                textTmp.setTextStyle(event.getParentTextStyle());
+                //有style则覆盖
+                if (tagEventTextStyle != null)
+                    overrideStyle(textid++, textTmp, tagEventTextStyle);
+
+                ret.add(textTmp);
             }
         }
         return ret;
     }
 
-    private void parseTextStyle(SubtitleEvent event, String textStyle) {
+    private void overrideStyle(int textIndex, AssSubtitleEvent.Text text, AssTagEventTextStyle style) {
+        if (text != null && style != null) {
+            if (style.isAlginSetted()) {
+                text.getTextStyle().setAlignment(style.getAlgin());
+            }
+
+            if(style.isAngleSetted())
+        }
+
+
+    }
+
+    private void parseTextStyle(AssTagEventTextStyle tagEventTextStyle, String textStyle) {
         //先把\t干掉
 //        Pattern pattern = Pattern.compile("(?:\\\\t)(.+?)(?:\\))");
 //        Matcher matcher = pattern.matcher(textStyle);
@@ -557,61 +594,206 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
             if (styleArr[i].trim().length() == 0)
                 continue;
             styleStr = "\\" + styleArr[i];
+
             if (styleStr.startsWith(OS_Anim_FadeSimple)) {
                 //\fad(222,222)
-            } if (styleStr.startsWith(OS_Anim_Fade)) {
+                int[] val = getTextStyleBracketVal(styleStr);
+                tagEventTextStyle.setAnimFadeShowTime(val[0]);
+                tagEventTextStyle.setAnimFadeHideTime(val[1]);
+            } else if (styleStr.startsWith(OS_Anim_Fade)) {
                 //\fade(0.0,1.0,0.0,500,500,500,500)范围0-255
             } else if (styleStr.startsWith(OS_Anim_Move)) {
                 //\move(380,235,380,240)
+                int[] val = getTextStyleBracketVal(styleStr);
+                tagEventTextStyle.setAnimMoveStartX(val[0]);
+                tagEventTextStyle.setAnimMoveStartY(val[1]);
+                tagEventTextStyle.setAnimMoveEndX(val[2]);
+                tagEventTextStyle.setAnimMoveEndY(val[3]);
             } else if (styleStr.startsWith(OS_FontName)) {
                 //\fn微软雅黑
+                tagEventTextStyle.setFontName(getTextStyleTagValue(OS_FontName, styleStr));
             } else if (styleStr.startsWith(OS_FontSize)) {
                 //\fs56.267
+                tagEventTextStyle.setFontSize((int) Double.parseDouble(getTextStyleTagValue(OS_FontSize, styleStr)));
             } else if (styleStr.startsWith(OS_Text_Bold)) {
                 //\b<0/1>
+                tagEventTextStyle.setBold(getTextStyleOnOff(OS_Text_Bold, styleStr));
             } else if (styleStr.startsWith(OS_Text_Italic)) {
                 //\i<0/1>
+                tagEventTextStyle.setItalic(getTextStyleOnOff(OS_Text_Italic, styleStr));
+
             } else if (styleStr.startsWith(OS_Text_Underline)) {
                 //这里多打了一个反斜杠\\u <0/1>
+                tagEventTextStyle.setUnderline(getTextStyleOnOff(OS_Text_Underline, styleStr));
+
             } else if (styleStr.startsWith(OS_Text_Deleteline)) {
                 //\s <0/1>  删除线（0=关闭，1=开启）
-            } else if (styleStr.startsWith(OS_Text_Gradient)) {
+                tagEventTextStyle.setStrikeOut(getTextStyleOnOff(OS_Text_Deleteline, styleStr));
+
+            } else if (styleStr.startsWith(OS_Text_Gradient + "x")) {
                 //\fa<x,y><degrees>  \fax-0.5 等同于斜体，一般不要超过±2
+
+                //只支持x轴方向上的倾斜
+                tagEventTextStyle.setAngle(string2Float(getTextStyleTagValue(OS_Text_Gradient + "x", styleStr)));
             } else if (styleStr.startsWith(OS_BordWidth)) {
                 //\bord[<x,y>]<width> \bord0 \bordx2 \bordy3
-            } else if (styleStr.startsWith(OS_ShadowDepth)) {
-                //\shad[<x,y>]<depth> 阴影深度
-            } else if (styleStr.startsWith(OS_Color_Primary)
-                    || styleStr.startsWith(OS_Color_Primary2)) {
-                //\c&H<bbggrr>& || \1c&H<bbggrr>&  可能末尾没有&
+                String val = getTextStyleTagValue(OS_BordWidth, styleStr);
+                int borderWidth = 0;
+                if (val.startsWith("x") || val.startsWith("y")) {
+                    borderWidth = string2Int(val.substring(1));
+                } else {
+                    borderWidth = string2Int(val);
+                }
+                tagEventTextStyle.setBorderWidth(borderWidth);
+
+            }
+//            else if (styleStr.startsWith(OS_ShadowDepth)) {
+//                \shad[<x,y>]<depth> 阴影深度
+//            }
+            else if (styleStr.startsWith(OS_Color_Primary)) {
+                //\c&H<bbggrr>&
+                tagEventTextStyle.setPrimaryColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Primary, styleStr)));
+
+            } else if (styleStr.startsWith(OS_Color_Primary2)) {
+                // \1c&H<bbggrr>&  可能末尾没有&
+                tagEventTextStyle.setPrimaryColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Primary2, styleStr)));
             } else if (styleStr.startsWith(OS_Color_Secondary)) {
                 //\2c&H<bbggrr>&
+                tagEventTextStyle.setSecondColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Secondary, styleStr)));
+
             } else if (styleStr.startsWith(OS_Color_Border)) {
                 //\3c&H<bbggrr>&
+                tagEventTextStyle.setBorderColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Border, styleStr)));
+
             } else if (styleStr.startsWith(OS_Color_Shadow)) {
                 //\4c&H<bbggrr>&
-            } else if (styleStr.startsWith(OS_Alpha_All)) {
-                //\alpha&H<aa>&
+                tagEventTextStyle.setShadowColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Shadow, styleStr)));
 
-            } else if (styleStr.startsWith(OS_Alpha_Primary)) {
-                //\1a&H<aa>&
-            } else if (styleStr.startsWith(OS_Alpha_Secondary)) {
-                //\2a&H<aa>&
-            } else if (styleStr.startsWith(OS_Alpha_Border)) {
-                //\3a&H<aa>&
-            } else if (styleStr.startsWith(OS_Alpha_Shadow)) {
+//            }
+//            else if (styleStr.startsWith(OS_Alpha_All)) {
+//                \alpha&H<aa>&
+//
+//            } else if (styleStr.startsWith(OS_Alpha_Primary)) {
+//                \1a&H<aa>&
+//            } else if (styleStr.startsWith(OS_Alpha_Secondary)) {
+//                \2a&H<aa>&
+//            } else if (styleStr.startsWith(OS_Alpha_Border)) {
+//                \3a&H<aa>&
+//            } else if (styleStr.startsWith(OS_Alpha_Shadow)) {
                 //\4a&H<aa>&
             } else if (styleStr.startsWith(OS_Align)) {
                 //\an<alignment> 类似小键盘
+                tagEventTextStyle.setAlgin(string2Int(getTextStyleTagValue(OS_Align, styleStr)));
             } else if (styleStr.startsWith(OS_Position)) {
                 //\pos(200,200)
-            }  else {
-                Log.d(TAG,"TextStyle not support:"+styleStr);
+                int[] val = getTextStyleBracketVal(styleStr);
+                tagEventTextStyle.setPosiX(val[0]);
+                tagEventTextStyle.setPosiY(val[1]);
+            } else {
+                Log.d(TAG, "TextStyle not support:" + styleStr);
             }
         }
 
-
         System.out.println(textStyle);
+    }
+
+    /**
+     * &H,& 区间内的值
+     *
+     * @param text
+     * @return
+     */
+    private String getTextStyleAlpha(String text) {
+        String ret = null;
+
+        if (text != null && text.length() >= 4) {
+            //去除&H
+            text = text.substring(2);
+            //去除尾部&
+            if (text.lastIndexOf("&") == text.length() - 1) {
+                text = text.substring(0, text.length() - 1);
+            }
+            if (text.length() == 2) {
+                ret = text;
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * &H,& 区间内的值
+     *
+     * @param text
+     * @return
+     */
+    private String getTextStyleColor(String text) {
+        String ret = null;
+
+        if (text != null && text.length() >= 8) {
+            //去除&H
+            text = text.substring(2);
+            //去除尾部&
+            if (text.lastIndexOf("&") == text.length() - 1) {
+                text = text.substring(0, text.length() - 1);
+            }
+            if (text.length() == 6 || text.length() == 8) {
+                ret = text;
+            }
+        }
+        return ret;
+    }
+
+    private String getTextStyleTagValue(String tag, String text) {
+        String value = null;
+        if (tag != null && text != null) {
+            text = text.trim().replaceAll(" ", "");
+            if (tag.length() != text.length()) {
+                value = text.substring(tag.length() - 1);
+            }
+        }
+        return value;
+    }
+
+    /**
+     * @param tag  \b
+     * @param text \b1
+     * @return 类似这种 \b<0/1>
+     */
+    private boolean getTextStyleOnOff(String tag, String text) {
+        boolean ret = false;
+        String strVal = getTextStyleTagValue(tag, text);
+        if (strVal == null)
+            return ret;
+
+        if (strVal.equals("0")) {
+            ret = false;
+        } else if (strVal.equals("1")) {
+            ret = true;
+        }
+        return ret;
+    }
+
+    private int[] getTextStyleBracketVal(String text) {
+        if (text == null)
+            return null;
+        int[] ret = null;
+
+        int bracketL = text.indexOf("(");
+        int bracketR = text.indexOf(")");
+        if (bracketL != -1 && bracketR != -1
+                && bracketL < bracketR) {
+            text = text.substring(bracketL + 1, bracketR);
+            text = text.trim();
+            String[] strArr = text.split(",");
+            if (strArr.length > 0) {
+                ret = new int[strArr.length];
+            }
+            for (int i = 0; i < strArr.length; i++) {
+                ret[i] = (int) Double.parseDouble(strArr[i]);
+            }
+
+        }
+        return ret;
     }
 
     private List<TextIndex> getTextIndexList(String text) {
@@ -656,15 +838,21 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
         return textIndices;
     }
 
+    /**
+     * 存放text中区分样式与文字的子串
+     */
     private static class TextIndex {
         enum Type {
             Style,
             Text
         }
 
+        //内容
         String text;
+        //在原字符串中的首尾位置
         int start;
         int end;
+        //区分样式或文字
         Type type;
 
         @Override

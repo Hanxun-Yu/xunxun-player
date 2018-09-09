@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class SrtSubtitleParser extends AbstractSubtitleParser {
 
-    public List<SubtitleEvent> convertToEvent(String allcontent) {
+    public List<? extends  SubtitleEvent> convertToEvent(String allcontent) {
         Log.d(TAG, "allcontent:" + allcontent);
         if (TextUtils.isEmpty(allcontent)) {
             onParseFailer("subtitle content:null");
@@ -37,7 +37,7 @@ public class SrtSubtitleParser extends AbstractSubtitleParser {
         String index;
         String time;
         String content = null;
-        SubtitleEvent subtitleEventItem = null;
+        SrtSubtitleEvent subtitleEventItem = null;
         try {
             for (int i = 0; i < strArr.length; i++) {
                 content = "";
@@ -56,7 +56,7 @@ public class SrtSubtitleParser extends AbstractSubtitleParser {
                 }
 
 
-                subtitleEventItem = new SubtitleEvent();
+                subtitleEventItem = new SrtSubtitleEvent();
                 subtitleEventItem.setIndex(Integer.parseInt(index));
                 subtitleEventItem.setText(content);
 

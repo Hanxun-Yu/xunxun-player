@@ -505,7 +505,7 @@ public class FileBrowerFragment extends Fragment implements IMenu.OnKeyListener 
             if (needUserPass)
                 smbFileUtils.listSmbFilesForAndroid(mID, username, password, listener);
             else
-                smbFileUtils.listSmbFilesForAndroid(mID, listener);
+                smbFileUtils.listSmbFilesForAndroid(mID, "guest","guest",listener);
 
 
         } else {

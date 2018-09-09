@@ -65,7 +65,7 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
         public void run() {
             isRunning = true;
             String content = FileRW.fileToString(path, getEncoder(path));
-            List<SubtitleEvent> ret = convertToEvent(content);
+            List<? extends SubtitleEvent> ret = convertToEvent(content);
             if (ret != null) {
                 if (listener != null)
                     listener.onFinish(path, ret);
@@ -103,7 +103,7 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
         return ret;
     }
 
-    protected abstract List<SubtitleEvent> convertToEvent(String str);
+    protected abstract List<? extends  SubtitleEvent> convertToEvent(String str);
 
 
     protected void onParseFailer(String error) {

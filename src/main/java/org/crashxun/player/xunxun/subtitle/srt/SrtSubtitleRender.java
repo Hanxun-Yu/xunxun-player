@@ -39,7 +39,7 @@ public class SrtSubtitleRender implements ISubtitleRender {
                     setRenderParentSize(msg.arg1, msg.arg2);
                     break;
                 case MSG_SUBTITLE_EVENT_NEW:
-                    SubtitleEvent subtitleEvent = (SubtitleEvent) msg.obj;
+                    SrtSubtitleEvent subtitleEvent = (SrtSubtitleEvent) msg.obj;
                     Log.d(TAG, "MSG_SUBTITLE_EVENT_NEW event:" + subtitleEvent);
 
                     //有字幕事件

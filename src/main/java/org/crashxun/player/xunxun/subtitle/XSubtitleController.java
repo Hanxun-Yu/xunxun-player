@@ -141,7 +141,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
         this.onStateChangedListener = listener;
     }
 
-    private void startRender(String path, List<SubtitleEvent> events) {
+    private void startRender(String path, List<? extends SubtitleEvent> events) {
         Log.d(TAG, "startRender path:" + path + " size:" + events.size());
         subtitleGenerateRunn = new SubtitleGenerateRunn(path, events);
         executorService.execute(subtitleGenerateRunn);
@@ -153,10 +153,10 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
         }
 
         private boolean stop = false;
-        private List<SubtitleEvent> events;
+        private List<? extends SubtitleEvent> events;
         private String path;
 
-        private SubtitleGenerateRunn(String path, List<SubtitleEvent> events) {
+        private SubtitleGenerateRunn(String path, List<? extends SubtitleEvent> events) {
             this.events = events;
             this.path = path;
         }
@@ -322,7 +322,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
     }
 
     @Override
-    public void onFinish(final String path, final List<SubtitleEvent> events) {
+    public void onFinish(final String path, final List<? extends SubtitleEvent> events) {
         Log.d(TAG,"onFinish path:"+path+" event:"+events.size());
         handler.post(new Runnable() {
             @Override
