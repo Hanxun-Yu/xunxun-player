@@ -166,4 +166,9 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
         });
         System.out.println(Arrays.toString(list.toArray()));
     }
+
+
+    protected void throwEx(String msg) {
+        throw new IllegalArgumentException(msg);
+    }
 }

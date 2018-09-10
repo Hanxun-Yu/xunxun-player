@@ -7,12 +7,15 @@ import android.util.Log;
 
 import org.crashxun.player.xunxun.samba.SmbFileUtils;
 import org.crashxun.player.xunxun.subtitle.api.ISubtitleParser;
+import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
+import org.crashxun.player.xunxun.subtitle.ass.AssSubtitleParser;
 import org.crashxun.player.xunxun.subtitle.srt.SrtSubtitleParser;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import jcifs.UniAddress;
 import jcifs.smb.NtlmPasswordAuthentication;
@@ -34,9 +37,29 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
     String TAG = "ApplicationTest_xunxun";
 
     public void testSub() {
-        ISubtitleParser subtitleParser = new SrtSubtitleParser();
-        subtitleParser.loadFile("/sdcard/Game.of.Thrones.S01E01.srt");
+        ISubtitleParser subtitleParser = new AssSubtitleParser();
+        subtitleParser.loadFile("/sdcard/Game.of.Thrones.S01E10.ass");
 //        subtitleParser.loadFile("/sdcard/Game.of.Thrones.S01E10.ass");
+        subtitleParser.setOnStateChangedListener(new ISubtitleParser.OnStateChangedListener() {
+            @Override
+            public void onLoading(String path, int percent) {
+                Log.d(TAG,"onLoading percent:"+percent);
+            }
+
+            @Override
+            public void onFailed(String msg) {
+                Log.d(TAG,"onFailed msg:"+msg);
+
+            }
+
+            @Override
+            public void onFinish(String path, List<? extends SubtitleEvent> events) {
+                Log.d(TAG,"onFinish events:"+events.size());
+                for(SubtitleEvent event:events) {
+                    Log.d(TAG,"event:"+event);
+                }
+            }
+        });
         Looper.loop();
     }
 

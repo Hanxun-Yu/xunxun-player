@@ -2,7 +2,7 @@ package org.crashxun.player.xunxun.subtitle.srt;
 
 import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
 
-public class SrtSubtitleEvent extends SubtitleEvent{
+public class SrtSubtitleEvent extends SubtitleEvent {
 
     private String text;
 
@@ -16,7 +16,7 @@ public class SrtSubtitleEvent extends SubtitleEvent{
 
     @Override
     public String toString() {
-        return "SrtSubtitleEvent{" +
+        return super.toString() + "\n"+ "SrtSubtitleEvent{" +
                 "text='" + text + '\'' +
                 '}';
     }

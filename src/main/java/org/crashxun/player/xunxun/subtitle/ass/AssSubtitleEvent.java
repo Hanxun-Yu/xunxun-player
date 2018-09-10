@@ -120,7 +120,7 @@ public class AssSubtitleEvent extends SubtitleEvent {
         private TextStyle textStyle;
 
         //动画暂时属于事件,单条文字不支持动画
-        private  Anim anim;
+//        private  Anim anim;
 
         public String getText() {
             return text;
@@ -138,12 +138,20 @@ public class AssSubtitleEvent extends SubtitleEvent {
             this.textStyle = textStyle;
         }
 
-        public Anim getAnim() {
-            return anim;
-        }
-//
-        public void setAnim(Anim anim) {
-            this.anim = anim;
+//        public Anim getAnim() {
+//            return anim;
+//        }
+////
+//        public void setAnim(Anim anim) {
+//            this.anim = anim;
+//        }
+
+        @Override
+        public String toString() {
+            return "Text{" +
+                    "text='" + text + '\'' +
+                    ", textStyle=" + textStyle +
+                    '}';
         }
     }
 
@@ -298,59 +306,27 @@ public class AssSubtitleEvent extends SubtitleEvent {
         public void setBorderShadowWidth(int borderShadowWidth) {
             this.borderShadowWidth = borderShadowWidth;
         }
-        public Alignment getAlignment() {
-            return alignment;
+
+        @Override
+        public String toString() {
+            return "TextStyle{" +
+                    "isBold=" + isBold +
+                    ", isItalic=" + isItalic +
+                    ", isUnderline=" + isUnderline +
+                    ", isStrikeOut=" + isStrikeOut +
+                    ", fontName='" + fontName + '\'' +
+                    ", fontSize=" + fontSize +
+                    ", primaryColor='" + primaryColor + '\'' +
+                    ", secondColor='" + secondColor + '\'' +
+                    ", borderColor='" + borderColor + '\'' +
+                    ", shadowColor='" + shadowColor + '\'' +
+                    ", spacing=" + spacing +
+                    ", angle=" + angle +
+                    ", borderStyle=" + borderStyle +
+                    ", borderWidth=" + borderWidth +
+                    ", borderShadowWidth=" + borderShadowWidth +
+                    '}';
         }
-
-        public void setAlignment(Alignment alignment) {
-            this.alignment = alignment;
-        }
-
-        public void setAlignment(int alignment) {
-            switch (alignment) {
-                case 1:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.LeftBottom);
-                    break;
-                case 2:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.Bottom);
-
-                    break;
-                case 3:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.RightBottom);
-
-                    break;
-                case 4:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.Left);
-
-                    break;
-                case 5:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.Center);
-
-                    break;
-                case 6:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.Right);
-
-                    break;
-                case 7:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.LeftTop);
-
-                    break;
-                case 8:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.Top);
-
-                    break;
-                case 9:
-                    setAlignment(AssSubtitleEvent.TextStyle.Alignment.RightTop);
-                    break;
-            }
-        }
-        public enum Alignment {
-            LeftTop, Top, RightTop,
-            Left, Center, Right,
-            LeftBottom, Bottom, RightBottom
-        }
-        private Alignment alignment;
-
     }
 
     public static class Anim {
@@ -408,6 +384,88 @@ public class AssSubtitleEvent extends SubtitleEvent {
         public void setAnimMoveEndY(int animMoveEndY) {
             this.animMoveEndY = animMoveEndY;
         }
+
+        @Override
+        public String toString() {
+            return "Anim{" +
+                    "animFadeShowTime=" + animFadeShowTime +
+                    ", animFadeHideTime=" + animFadeHideTime +
+                    ", animMoveStartX=" + animMoveStartX +
+                    ", animMoveStartY=" + animMoveStartY +
+                    ", animMoveEndX=" + animMoveEndX +
+                    ", animMoveEndY=" + animMoveEndY +
+                    '}';
+        }
     }
 
+    public Alignment getAlignment() {
+        return alignment;
+    }
+
+    public void setAlignment(Alignment alignment) {
+        this.alignment = alignment;
+    }
+
+    public void setAlignment(int alignment) {
+        switch (alignment) {
+            case 1:
+                setAlignment(AssSubtitleEvent.Alignment.LeftBottom);
+                break;
+            case 2:
+                setAlignment(AssSubtitleEvent.Alignment.Bottom);
+
+                break;
+            case 3:
+                setAlignment(AssSubtitleEvent.Alignment.RightBottom);
+
+                break;
+            case 4:
+                setAlignment(AssSubtitleEvent.Alignment.Left);
+
+                break;
+            case 5:
+                setAlignment(AssSubtitleEvent.Alignment.Center);
+
+                break;
+            case 6:
+                setAlignment(AssSubtitleEvent.Alignment.Right);
+
+                break;
+            case 7:
+                setAlignment(AssSubtitleEvent.Alignment.LeftTop);
+
+                break;
+            case 8:
+                setAlignment(AssSubtitleEvent.Alignment.Top);
+
+                break;
+            case 9:
+                setAlignment(AssSubtitleEvent.Alignment.RightTop);
+                break;
+        }
+    }
+    public enum Alignment {
+        LeftTop, Top, RightTop,
+        Left, Center, Right,
+        LeftBottom, Bottom, RightBottom
+    }
+    private Alignment alignment;
+
+    @Override
+    public String toString() {
+        return super.toString()+"\n"+"AssSubtitleEvent{" +
+                "baseScreenWidth=" + baseScreenWidth +
+                ", baseScreenHeight=" + baseScreenHeight +
+                ", posiX=" + posiX +
+                ", posiY=" + posiY +
+                ", marginVertical=" + marginVertical +
+                ", marginRight=" + marginRight +
+                ", marginLeft=" + marginLeft +
+                ", layer=" + layer +
+                ", parentTextStyle=" + parentTextStyle +
+                ", parentAnim=" + parentAnim +
+                ", texts=" + texts +
+                ", alignment=" + alignment +
+                '}';
+    }
 }

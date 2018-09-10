@@ -71,4 +71,23 @@ public class SubtitleEvent {
         }
         return o;
     }
+
+    @Override
+    public String toString() {
+        return "SubtitleEvent{" +
+                "index=" + index +
+                ", startTimeText='" + startTimeText + '\'' +
+                ", endTimeText='" + endTimeText + '\'' +
+                ", startTimeMilliSec=" + startTimeMilliSec +
+                ", endTimeMilliSec=" + endTimeMilliSec +
+                ", duringMilliSec=" + duringMilliSec +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof SubtitleEvent)
+            return index == ((SubtitleEvent) obj).index;
+        return super.equals(obj);
+    }
 }

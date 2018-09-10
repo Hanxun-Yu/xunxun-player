@@ -17,8 +17,10 @@ import org.crashxun.player.xunxun.subtitle.api.ISubtitleParser;
 import org.crashxun.player.xunxun.subtitle.api.ISubtitleRender;
 import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
 import org.crashxun.player.xunxun.subtitle.ass.AssSubtitleParser;
+import org.crashxun.player.xunxun.subtitle.ass.AssSubtitleRender;
 import org.crashxun.player.xunxun.subtitle.srt.SrtSubtitleParser;
 import org.crashxun.player.xunxun.subtitle.srt.SrtSubtitleRender;
+import org.crashxun.player.xunxun.subtitle.srt.SrtSubtitleRender2;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -73,10 +75,10 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
             ISubtitleParser subtitleParser = null;
             if (path.toLowerCase().endsWith(".srt")) {
                 subtitleParser = new SrtSubtitleParser();
-                subtitleRender = new SrtSubtitleRender();
+                subtitleRender = new SrtSubtitleRender2();
             } else if (path.toLowerCase().endsWith(".ass")) {
                 subtitleParser = new AssSubtitleParser();
-                subtitleRender = new SrtSubtitleRender();
+                subtitleRender = new AssSubtitleRender();
             }
             subtitleRender.attach(anchorView);
 
@@ -132,7 +134,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
         //起线程开始判断时间
         if (subtitleGenerateRunn != null)
             subtitleGenerateRunn.setStop(true);
-        if(subtitleRender != null)
+        if (subtitleRender != null)
             subtitleRender.detach();
     }
 
@@ -163,7 +165,11 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
 
         SubtitleEvent lastEvent;
         long lastPlayerPosi;
-        final int sleep = 80;
+
+        final int sleep = 20;
+        //if event.startTime - currentTime > threshold,then ignore it,
+        //This will happen when the subtitles are loaded in the middle of the movie
+        final int threshold = 200;
         int startSearchIndex = 0;
 
 
@@ -184,6 +190,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
                     //重新搜索当前字幕
                     Log.d(TAG, "SubtitleGenerateRunn startSearchIndex:retset to 0");
                     startSearchIndex = 0;
+                    subtitleRender.clearAll();
                 }
 
                 List<Integer> foundIndexList = getEventInTime(startSearchIndex, curTime);
@@ -197,7 +204,8 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
                     //搜到了
                     for (int i = 0; i < foundIndexList.size(); i++) {
                         if (i == 0) {
-                            if(startSearchIndex != foundIndexList.get(i)) {
+                            //fresh the next search startIndex
+                            if (startSearchIndex != foundIndexList.get(i)) {
                                 startSearchIndex = foundIndexList.get(i);
                                 Log.d(TAG, "SubtitleGenerateRunn startSearchIndex:" + startSearchIndex);
                             }
@@ -251,26 +259,28 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
 
         private boolean isEventInTime(SubtitleEvent event, long time) {
             boolean ret = false;
-            time+=adjustTimeMilliSec;
+            time += adjustTimeMilliSec;
+            //if in time
             if (event.getStartTimeMilliSec() < time && event.getEndTimeMilliSec() > time) {
-                ret = true;
+                //check threshold
+                if (time - event.getStartTimeMilliSec() < threshold) {
+                    ret = true;
+                }
             }
             return ret;
         }
-
-
     }
 
 
     private void registReceiver() {
-        if(receiver == null)
+        if (receiver == null)
             receiver = new MReceiver();
         IntentFilter intentFilter = new IntentFilter(ACTION_ADJUST_TIME);
-        mContext.registerReceiver(receiver,intentFilter);
+        mContext.registerReceiver(receiver, intentFilter);
     }
 
     private void unRegistReceiver() {
-        if(receiver != null) {
+        if (receiver != null) {
             mContext.unregisterReceiver(receiver);
             receiver = null;
         }
@@ -279,8 +289,8 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
     private class MReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(ACTION_ADJUST_TIME)) {
-                int milliSecond = intent.getIntExtra(KEY_ADJUST_TIME_PARAM,0);
+            if (intent.getAction().equals(ACTION_ADJUST_TIME)) {
+                int milliSecond = intent.getIntExtra(KEY_ADJUST_TIME_PARAM, 0);
                 timeAdjust(milliSecond);
             }
         }
@@ -289,10 +299,11 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
 
     //-----------------------------subtitle parser------------------------------------
     int lastPercent = -1;
+
     @Override
     public void onLoading(final String path, final int percent) {
-        Log.d(TAG,"onLoading path:"+path+":"+percent+"%");
-        if(lastPercent != percent) {
+        Log.d(TAG, "onLoading path:" + path + ":" + percent + "%");
+        if (lastPercent != percent) {
             lastPercent = percent;
             handler.post(new Runnable() {
                 @Override
@@ -307,9 +318,9 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
 
     @Override
     public void onFailed(String msg) {
-        Log.d(TAG,"onFailed msg:"+msg);
-        if(msg.indexOf("For input string: \"\"") != -1) {
-            msg+=" 可能存在多余换行符号";
+        Log.d(TAG, "onFailed msg:" + msg);
+        if (msg.indexOf("For input string: \"\"") != -1) {
+            msg += " 可能存在多余换行符号";
         }
         final String finalMsg = msg;
         handler.post(new Runnable() {
@@ -323,7 +334,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
 
     @Override
     public void onFinish(final String path, final List<? extends SubtitleEvent> events) {
-        Log.d(TAG,"onFinish path:"+path+" event:"+events.size());
+        Log.d(TAG, "onFinish path:" + path + " event:" + events.size());
         handler.post(new Runnable() {
             @Override
             public void run() {

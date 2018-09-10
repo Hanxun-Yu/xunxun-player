@@ -131,6 +131,11 @@ public class SrtSubtitleRender implements ISubtitleRender {
     }
 
     @Override
+    public void clearAll() {
+
+    }
+
+    @Override
     public void showLoading(int percent) {
         renderText("Subtitle Loading:"+percent+"%");
     }
