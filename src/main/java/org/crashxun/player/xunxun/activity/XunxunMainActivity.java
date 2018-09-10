@@ -51,6 +51,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
     private float mInitialLogoOffset;
 
     String TAG = "XunxunMainActivity_xunxun";
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,25 +84,40 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
         mAnimatedSvgView.setGlyphStrings(GAStudioPath2.path);
 
         // ARGB values for each glyph
+//        mAnimatedSvgView.setFillPaints(
+//                new int[]{
+//                        210
+//                },
+//                new int[]{
+//                        00
+//                },
+//                new int[]{
+//                        180
+//                },
+//                new int[]{
+//                        00
+//                });
         mAnimatedSvgView.setFillPaints(
-                new int[] {
+                new int[]{
                         210
                 },
-                new int[] {
-                        00
+                new int[]{
+                        226
                 },
-                new int[] {
-                        180
+                new int[]{
+                        54
                 },
-                new int[] {
-                        00
+                new int[]{
+                        54
                 });
 
         // �����ߵ���ɫ
-        int traceColor = Color.argb(255, 0, 200, 100);
+//        int traceColor = Color.argb(255, 0, 200, 100);
+        int traceColor = Color.argb(255, 225, 54, 54);
         int[] traceColors = new int[2]; // 4 glyphs
         // ��Ե�ߵ���ɫ
-        int residueColor = Color.argb(100, 175, 190, 6);
+//        int residueColor = Color.argb(100, 175, 190, 6);
+        int residueColor = Color.argb(100, 225, 54, 54);
         int[] residueColors = new int[2]; // 4 glyphs
 
         // Every glyph will have the same trace/residue
@@ -127,7 +143,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
             @Override
             public void onStateChange(int state) {
                 if (state == AnimatedSvgView.STATE_FINISHED) {
-                    TranslateAnimation animation = new TranslateAnimation(0,300,0,0);
+                    TranslateAnimation animation = new TranslateAnimation(0, 300, 0, 0);
                     animation.setInterpolator(new DecelerateInterpolator());
                     animation.setDuration(1500);
 //                    animation.setFillAfter(true);
@@ -157,7 +173,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
                                     mAnimatedSvgView.startLoop();
                                     f.setUserVisibleHint(true);
                                 }
-                            },1000);
+                            }, 1000);
 
                         }
 
@@ -185,7 +201,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
             }
         });
 
-        Intent intent = new Intent(this,PlayFileService.class);
+        Intent intent = new Intent(this, PlayFileService.class);
         startService(intent);
     }
 
@@ -197,7 +213,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
     }
 
     private void unregistReceiver() {
-        if(fileSelectReceiver != null) {
+        if (fileSelectReceiver != null) {
             unregisterReceiver(fileSelectReceiver);
             fileSelectReceiver = null;
         }
@@ -245,7 +261,7 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
     @Override
     public void onGlobalFocusChanged(View oldFocus, View newFocus) {
         Log.d(TAG, "--------------onGlobalFocusChanged------------");
-        Log.d(TAG, "oldFocus:"+oldFocus+" newFocus:"+newFocus);
+        Log.d(TAG, "oldFocus:" + oldFocus + " newFocus:" + newFocus);
     }
 
     private void showShadow() {
@@ -265,47 +281,48 @@ public class XunxunMainActivity extends FragmentActivity implements ViewTreeObse
     BroadcastReceiver fileSelectReceiver;
 
     void registReceiver() {
-        if(fileSelectReceiver == null) {
+        if (fileSelectReceiver == null) {
             fileSelectReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if(intent.getAction().equals(ACTION_MAIN_FILEBROWER_FILESELECTED)) {
-                       String path = intent.getStringExtra(KEY_PARAMS_ACTIVITY);
+                    if (intent.getAction().equals(ACTION_MAIN_FILEBROWER_FILESELECTED)) {
+                        String path = intent.getStringExtra(KEY_PARAMS_ACTIVITY);
 
-                       String name = path;
+                        String name = path;
 
-                       if(path != null && path.startsWith("smb://")) {
-                           try {
-                               path = URLEncoder.encode(path, "utf-8");
-                           } catch (UnsupportedEncodingException e) {
-                               e.printStackTrace();
-                           }
-                           play("http://" + PlayFileService.IP + ":" + PlayFileService.PORT + "/" + path, name);
-                       } else {
-                           play(path,name);
-                       }
+                        if (path != null && path.startsWith("smb://")) {
+                            try {
+                                path = URLEncoder.encode(path, "utf-8");
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                            play("http://" + PlayFileService.IP + ":" + PlayFileService.PORT + "/" + path, name);
+                        } else {
+                            play(path, name);
+                        }
                     }
                 }
             };
 
             IntentFilter intentFilter = new IntentFilter(ACTION_MAIN_FILEBROWER_FILESELECTED);
-            registerReceiver(fileSelectReceiver,intentFilter);
+            registerReceiver(fileSelectReceiver, intentFilter);
         }
     }
 
 
-    private void play(String path,String name) {
+    private void play(String path, String name) {
         Intent intentPlayer = new Intent(this, VideoActivity.class);
-        intentPlayer.putExtra("videoPath",path);
-        intentPlayer.putExtra("videoName",name);
+        intentPlayer.putExtra("videoPath", path);
+        intentPlayer.putExtra("videoName", name);
         startActivity(intentPlayer);
     }
 
 
     boolean responseKeyEvent = true;
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(responseKeyEvent)
+        if (responseKeyEvent)
             return super.dispatchKeyEvent(event);
         else
             return true;

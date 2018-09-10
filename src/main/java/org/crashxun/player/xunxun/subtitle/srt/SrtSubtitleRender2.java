@@ -3,8 +3,14 @@ package org.crashxun.player.xunxun.subtitle.srt;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.Html;
+import android.text.TextPaint;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -12,29 +18,67 @@ import org.crashxun.player.R;
 import org.crashxun.player.xunxun.subtitle.api.AbstractSubtitleRender;
 import org.crashxun.player.xunxun.subtitle.api.RenderEvent;
 import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
+import org.crashxun.player.xunxun.subtitle.ass.AssSubtitleEvent;
 
 public class SrtSubtitleRender2 extends AbstractSubtitleRender {
 
 
-    final int textSizeRatioScreenWidth = 80;
+    final int textSizeRatioScreenWidth = 50;
     Typeface typeface;
+
+    private ViewGroup textLinearParent;
+
+    @Override
+    protected void onAttach(ViewGroup renderParentView) {
+        textLinearParent = getTextLinearParent();
+        renderParentView.addView(textLinearParent);
+    }
+
+    private ViewGroup getTextLinearParent() {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        params.bottomMargin = 50;
+        LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setLayoutParams(params);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.setGravity(Gravity.CENTER);
+        return linearLayout;
+    }
 
     @Override
     protected void onRender(RenderEvent renderEvent, ViewGroup renderParentView) {
         TextView textView = (TextView) renderEvent.getRenderView();
         SrtSubtitleEvent event = (SrtSubtitleEvent) renderEvent.getEvent();
-        renderParentView.setBackgroundColor(Color.parseColor("#ffffffff"));
+//        renderParentView.setBackgroundColor(Color.parseColor("#ffffffff"));
         Log.d(TAG, "renderParentView.getWidth():" + renderParentView.getWidth());
         textView.setTextSize(renderParentView.getLayoutParams().width / textSizeRatioScreenWidth);
         textView.setText(Html.fromHtml(event.getText()));
         Log.d(TAG, "textsize:" + textView.getTextSize() + " text:" + event.getText());
-        renderParentView.addView(renderEvent.getRenderView());
+        textLinearParent.addView(renderEvent.getRenderView());
+        Animation animation = getShowAnim();
+        renderEvent.getRenderView().startAnimation(animation);
     }
 
     @Override
     protected void onRenderEventClean(RenderEvent renderEvent, ViewGroup renderParentView) {
-        renderParentView.removeView(renderEvent.getRenderView());
+        renderEvent.getRenderView().clearAnimation();
+        textLinearParent.removeView(renderEvent.getRenderView());
     }
+
+    private Animation getShowAnim() {
+        Animation animation = new AlphaAnimation(0f,0.8f);
+        animation.setDuration(50);
+        return animation;
+    }
+
+    Animation getHideAnim() {
+        Animation animation = new AlphaAnimation(0.8f,0f);
+        animation.setDuration(100);
+        return animation;
+    }
+
+
 
     @Override
     protected RenderEvent getRenderEvent(SubtitleEvent event) {
@@ -45,10 +89,9 @@ public class SrtSubtitleRender2 extends AbstractSubtitleRender {
         textView.setTextColor(context.getResources().getColor(R.color.white_text_color));
         textView.setShadowLayer(7f, 3, 3, Color.parseColor("#ff000000"));
         textView.setTypeface(typeface);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        params.bottomMargin = 100;
+        textView.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+
         textView.setLayoutParams(params);
         return new RenderEvent(event, textView);
     }

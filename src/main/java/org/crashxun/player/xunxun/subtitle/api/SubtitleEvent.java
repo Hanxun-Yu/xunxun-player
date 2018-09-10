@@ -13,6 +13,7 @@ public class SubtitleEvent {
     private long startTimeMilliSec;
     private long endTimeMilliSec;
     private long duringMilliSec;
+    private long putIntoRenderTime;
 
     public int getIndex() {
         return index;
@@ -60,6 +61,14 @@ public class SubtitleEvent {
 
     public void setDuringMilliSec(long duringMilliSec) {
         this.duringMilliSec = duringMilliSec;
+    }
+
+    public long getPutIntoRenderTime() {
+        return putIntoRenderTime;
+    }
+
+    public void setPutIntoRenderTime(long putIntoRenderTime) {
+        this.putIntoRenderTime = putIntoRenderTime;
     }
 
     public SubtitleEvent clone() {

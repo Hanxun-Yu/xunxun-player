@@ -38,6 +38,7 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
     private int lastWidth;
     private int lastHeight;
 
+    private int preventOverlapTime = 50;
     private Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
         Message msgTmp = null;
 
@@ -55,14 +56,17 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
 
                     //加入消息放在主线程,如果在线程中加入
                     //会导致当主线程执行清除过程中,还正在加入
-                    addRenderEvent(renderEvent);
-                    //删除旧的(自动清空)消息
-                    removeCleanMsg(renderEvent);
-                    //添加自动清除消息
-                    cleanDelay(renderEvent);
+                    if(!isEventIsRendering(event.getIndex())) {
+                        addRenderEvent(renderEvent);
+                        //删除旧的(自动清空)消息
+                        removeCleanMsg(renderEvent);
+                        //添加自动清除消息
+                        cleanDelay(renderEvent);
 
-                    //渲染
-                    onRender(renderEvent, renderParentView);
+                        //渲染
+                        onRender(renderEvent, renderParentView);
+                    }
+
                     break;
                 case MSG_SUBTITLE_EVENT_CLEAN_ONE:
                     Log.d(TAG, "MSG_SUBTITLE_EVENT_CLEAN");
@@ -87,7 +91,9 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
 
         private void cleanDelay(RenderEvent event) {
             msgTmp = handler.obtainMessage(MSG_SUBTITLE_EVENT_CLEAN_ONE, event);
-            handler.sendMessageDelayed(msgTmp, event.getEvent().getDuringMilliSec());
+            int processTime = (int) (System.currentTimeMillis() - event.getEvent().getPutIntoRenderTime());
+            Log.d(TAG,"processTime:"+processTime);
+            handler.sendMessageDelayed(msgTmp, event.getEvent().getDuringMilliSec()-processTime-preventOverlapTime);
         }
 
         private void removeCleanMsg(RenderEvent event) {
@@ -106,6 +112,8 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
         backgroundView.addView(loadingText);
         backgroundView.addView(renderParentView);
         anchor.addView(backgroundView);
+
+        onAttach(renderParentView);
     }
 
 
@@ -122,7 +130,7 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
 
 
         //如果不包含在(正在渲染的事件)
-        if (!isEventIsRendering(subtitleEvent)) {
+        if (!isEventIsRendering(subtitleEvent.getIndex())) {
             handler.obtainMessage(MSG_SUBTITLE_EVENT_NEW, subtitleEvent).sendToTarget();
         }
     }
@@ -150,10 +158,10 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
     //-----------------------------sync list-------------------------------------
 
 
-    private synchronized boolean isEventIsRendering(SubtitleEvent subtitleEvent) {
+    private synchronized boolean isEventIsRendering(int id) {
         boolean ret = false;
         for (RenderEvent event : renderingEvents) {
-            if (event.getId() == subtitleEvent.getIndex()) {
+            if (event.getId() == id) {
                 ret = true;
                 break;
             }
@@ -219,6 +227,7 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
     }
 
 
+    protected  abstract void onAttach(ViewGroup renderParentView);
     //how render
     protected abstract void onRender(RenderEvent renderEvent, ViewGroup renderParentView);
 
@@ -231,6 +240,7 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
     //do something when RenderParentSizeChanged
     protected abstract void onRenderParentSizeChanged(int w, int height, ViewGroup renderParentView);
 
+
     @Override
     public void showLoading(int percejt) {
         loadingText.setTextSize(backgroundView.getWidth() / 50);
@@ -242,4 +252,6 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
     public void hideLoading() {
         loadingText.setVisibility(View.INVISIBLE);
     }
+
+
 }

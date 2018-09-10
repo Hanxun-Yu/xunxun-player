@@ -10,6 +10,11 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
 
 
     @Override
+    protected void onAttach(ViewGroup renderParentView) {
+
+    }
+
+    @Override
     protected void onRender(RenderEvent renderEvent, ViewGroup renderParentView) {
 
     }

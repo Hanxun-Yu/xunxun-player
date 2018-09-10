@@ -136,6 +136,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
             subtitleGenerateRunn.setStop(true);
         if (subtitleRender != null)
             subtitleRender.detach();
+        curSubtitlePath = null;
     }
 
     @Override
@@ -169,7 +170,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
         final int sleep = 20;
         //if event.startTime - currentTime > threshold,then ignore it,
         //This will happen when the subtitles are loaded in the middle of the movie
-        final int threshold = 200;
+        final int threshold = 50;
         int startSearchIndex = 0;
 
 
@@ -211,6 +212,7 @@ public class XSubtitleController implements ISubtitleController, ISubtitleParser
                             }
                         }
                         //抛出显示事件
+                        events.get(foundIndexList.get(i)).setPutIntoRenderTime(System.currentTimeMillis());
                         subtitleRender.putSubtitleEvent(subtitleMediaPlayer.getMovieWidth(),
                                 subtitleMediaPlayer.getMovieHeight(), events.get(foundIndexList.get(i)));
                     }

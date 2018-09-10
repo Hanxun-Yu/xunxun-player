@@ -286,13 +286,14 @@ public class VideoActivity extends FragmentActivity implements TracksFragment.IT
                             }
 
                             //停止外挂字幕
+                            mSubtitleController.stop();
 
                         } else {
                             //内嵌字幕
                             if (type.equals(Constant.VALUE_PARAMS_SUBTITLE_TYPE_INTERNAL)) {
                                 trackIndex = Integer.parseInt(id);
                                 Log.d(TAG, "menuEventReceiver----ACTION_SUBTITLE_CHANGED: internal:" + trackIndex);
-
+                                mSubtitleController.stop();
                                 for (MenuParams.MTrackInfo mTrackInfo : mMenuParams.internalSubtitleList) {
                                     if (mTrackInfo.trackIndex == trackIndex) {
                                         selectTrack(trackIndex);
