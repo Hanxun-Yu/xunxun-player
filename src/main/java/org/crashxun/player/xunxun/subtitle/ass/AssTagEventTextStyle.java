@@ -1,7 +1,9 @@
 package org.crashxun.player.xunxun.subtitle.ass;
 
-public class AssTagEventTextStyle {
+import android.util.Log;
 
+public class AssTagEventTextStyle {
+    final String TAG = getClass().getSimpleName()+"_xunxun";
 
     //位置
     private int posiX;
@@ -198,6 +200,7 @@ public class AssTagEventTextStyle {
     public void setPrimaryColor(String primaryColor) {
         primaryColorSetted = true;
         this.primaryColor = primaryColor;
+        Log.d(TAG,"setPrimaryColor:"+primaryColor);
     }
 
     public String getSecondColor() {
@@ -207,6 +210,8 @@ public class AssTagEventTextStyle {
     public void setSecondColor(String secondColor) {
         secondColorSetted = true;
         this.secondColor = secondColor;
+        Log.d(TAG,"setSecondColor:"+secondColor);
+
     }
 
     public String getBorderColor() {

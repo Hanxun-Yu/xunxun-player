@@ -159,21 +159,28 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
     /**
      * 传入6位颜色 或8位带透明度颜色
      * ass前2位透明度00表示不透明,ff表示透明,与android相反,需要转换
+     *
      * @param color
      * @return
      */
     private String getColor(String color) {
+//        Log.e(TAG, "getColor color:" + color);
         String ret = null;
         if (color != null && !color.equals("")) {
             if (color.length() == 6) {
-                ret = "#FF"+color;
+                //ass为bgr重排序为rgb
+                color = color.substring(4) + color.substring(2, 4) + color.substring(0, 2);
+                ret = "#FF" + color;
             } else if (color.length() == 8) {
-                int alpha = Integer.parseInt(color.substring(0,2),16);
+                color = color.substring(0, 2) + color.substring(6) + color.substring(4, 6) + color.substring(2, 4);
+                int alpha = Integer.parseInt(color.substring(0, 2), 16);
                 int androidAlpha = 255 - alpha;
                 String alphaStr = Integer.toHexString(androidAlpha);
-                ret = "#"+alphaStr+color.substring(2);
+                ret = "#" + alphaStr + color.substring(2);
             }
         }
+
+//        Log.e(TAG, "getColor color:" + color + " ret:" + ret);
         return ret;
     }
 
@@ -566,6 +573,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
             } else if (textIndex.type == TextIndex.Type.Text) {
                 AssSubtitleEvent.Text textTmp = new AssSubtitleEvent.Text();
                 textTmp.setText(textIndex.text);
+
                 //父样式先赋值
                 textTmp.setTextStyle(event.getParentTextStyle().clone());
                 //有style则覆盖
@@ -576,7 +584,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
             }
         }
 
-        Log.d(TAG,"parseText:"+ret);
+        Log.d(TAG, "parseText:" + ret);
         return ret;
     }
 
@@ -721,11 +729,14 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                 tagEventTextStyle.setAnimMoveStartY(val[1]);
                 tagEventTextStyle.setAnimMoveEndX(val[2]);
                 tagEventTextStyle.setAnimMoveEndY(val[3]);
-            }else if (styleStr.startsWith(OS_Position)) {
+            } else if (styleStr.startsWith(OS_Position)) {
                 //\pos(200,200)
                 int[] val = getTextStyleBracketVal(styleStr);
                 tagEventTextStyle.setPosiX(val[0]);
                 tagEventTextStyle.setPosiY(val[1]);
+            } else if (styleStr.startsWith(OS_FontScale)) {
+                //\fsc<x/y><percent>
+
             }
 //            else if (styleStr.startsWith(OS_ShadowDepth)) {
 //                \shad[<x,y>]<depth> 阴影深度
@@ -736,7 +747,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
             } else if (styleStr.startsWith(OS_FontSize)) {
                 //\fs56.267
                 tagEventTextStyle.setFontSize((int) Double.parseDouble(getTextStyleTagValue(OS_FontSize, styleStr)));
-            }else if (styleStr.startsWith(OS_BordWidth)) {
+            } else if (styleStr.startsWith(OS_BordWidth)) {
                 //\bord[<x,y>]<width> \bord0 \bordx2 \bordy3
                 String val = getTextStyleTagValue(OS_BordWidth, styleStr);
                 int borderWidth = 0;
@@ -747,12 +758,12 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                 }
                 tagEventTextStyle.setBorderWidth(borderWidth);
 
-            }   else if (styleStr.startsWith(OS_Text_Gradient + "x")) {
+            } else if (styleStr.startsWith(OS_Text_Gradient + "x")) {
                 //\fa<x,y><degrees>  \fax-0.5 等同于斜体，一般不要超过±2
 
                 //只支持x轴方向上的倾斜
                 tagEventTextStyle.setAngle(string2Float(getTextStyleTagValue(OS_Text_Gradient + "x", styleStr)));
-            }else if (styleStr.startsWith(OS_Text_Bold)) {
+            } else if (styleStr.startsWith(OS_Text_Bold)) {
                 //\b<0/1>
                 tagEventTextStyle.setBold(getTextStyleOnOff(OS_Text_Bold, styleStr));
             } else if (styleStr.startsWith(OS_Text_Italic)) {
@@ -931,11 +942,11 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
         //{}外
         //文字在{}前
         int firstBracketIndex = text.indexOf("{");
-        if(firstBracketIndex != -1 && firstBracketIndex != 0) {
+        if (firstBracketIndex != -1 && firstBracketIndex != 0) {
             textIndex = new TextIndex();
-            textIndex.text =text.substring(0,firstBracketIndex);
+            textIndex.text = text.substring(0, firstBracketIndex);
             textIndex.start = 0;
-            textIndex.end = firstBracketIndex-1;
+            textIndex.end = firstBracketIndex - 1;
             textIndex.type = TextIndex.Type.Text;
             textIndices.add(textIndex);
         }

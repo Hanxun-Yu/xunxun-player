@@ -352,6 +352,7 @@ public interface AssSubtitleDefine {
     String OS_WrapStyle = "\\q"; //val is VAL_ATTR_SI_WrapStyle_XXX
     String OS_FontName = "\\fn";
     String OS_FontSize = "\\fs";
+    String OS_FontScale="\\fsc";
     String OS_StyleChange = "\\r";
     String OS_Text_Bold = "\\b";
     String OS_Text_Italic = "\\i";

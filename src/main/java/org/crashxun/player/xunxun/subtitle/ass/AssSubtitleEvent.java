@@ -1,10 +1,13 @@
 package org.crashxun.player.xunxun.subtitle.ass;
 
+import android.util.Log;
+
 import org.crashxun.player.xunxun.subtitle.api.SubtitleEvent;
 
 import java.util.List;
 
 public class AssSubtitleEvent extends SubtitleEvent {
+    final String TAG = getClass().getSimpleName() +"_xunxun";
     //所有尺寸基于此参考宽高
     private int baseScreenWidth;
     private int baseScreenHeight;
@@ -93,9 +96,11 @@ public class AssSubtitleEvent extends SubtitleEvent {
 
     public TextStyle getParentTextStyle() {
         return parentTextStyle;
+
     }
 
     public void setParentTextStyle(TextStyle parentTextStyle) {
+//        Log.e(TAG,"setParentTextStyle:"+parentTextStyle);
         this.parentTextStyle = parentTextStyle;
     }
 
