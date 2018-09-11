@@ -1,5 +1,6 @@
 package org.crashxun.player.xunxun.subtitle.api;
 
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -66,6 +67,8 @@ public abstract class AbstractSubtitleParser implements ISubtitleParser {
             isRunning = true;
             String content = FileRW.fileToString(path, getEncoder(path));
             List<? extends SubtitleEvent> ret = convertToEvent(content);
+            SystemClock.sleep(500);
+
             if (ret != null) {
                 if (listener != null)
                     listener.onFinish(path, ret);

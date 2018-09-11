@@ -1,5 +1,6 @@
 package org.crashxun.player.xunxun.subtitle.ass;
 
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -117,7 +118,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                     //...
 
                     ret.add(subtitleEvent);
-                    int percent = (int) (i * 80f / assTag.getE().getDialogues().size());
+                    int percent = (int) (i * 100f / assTag.getE().getDialogues().size());
                     onParseLoading(path, percent < 0 ? 0 : percent);
                     Log.d(TAG, "convertToEvent i:" + i + " subtitleEventItem:" + subtitleEvent);
                 }

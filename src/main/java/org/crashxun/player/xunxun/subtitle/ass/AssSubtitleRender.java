@@ -1,5 +1,8 @@
 package org.crashxun.player.xunxun.subtitle.ass;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
@@ -27,12 +30,114 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
     }
 
     @Override
-    protected void onRender(RenderEvent renderEvent, ViewGroup renderParentView) {
-        AssSubtitleEvent subEvent = (AssSubtitleEvent) renderEvent.getEvent();
+    protected void onRender(final RenderEvent renderEvent, ViewGroup renderParentView) {
+        final AssSubtitleEvent subEvent = (AssSubtitleEvent) renderEvent.getEvent();
 //        if (subEvent.getParentAnim() != null) {
 //
 //        }
         renderParentView.addView(renderEvent.getRenderView());
+
+
+        AssSubtitleEvent.Anim anim = subEvent.getParentAnim();
+
+        //判断动画
+        if (anim != null) {
+            Log.d(TAG,"anim:"+anim);
+            int parentW = renderParentView.getLayoutParams().width;
+            int parentH = renderParentView.getLayoutParams().height;
+
+            int srcBaseW = subEvent.getBaseScreenWidth();
+            int srcBaseH = subEvent.getBaseScreenHeight();
+
+            boolean needMove = false;
+            boolean needFade = false;
+
+            final int moveStartX = getSize(srcBaseW, parentW, anim.getAnimMoveStartX());
+            final int moveStartY = getSize(srcBaseH, parentH, anim.getAnimMoveStartY());
+            final int moveEndX = getSize(srcBaseW, parentW, anim.getAnimMoveEndX());
+            final int moveEndY = getSize(srcBaseH, parentH, anim.getAnimMoveEndY());
+            if (anim.getAnimMoveStartX() != 0) {
+                //有移动动画
+                needMove = true;
+
+            }
+
+            final int fadeShowTime = anim.getAnimFadeShowTime();
+            final int fadeHideTime = anim.getAnimFadeHideTime();
+            if (anim.getAnimFadeShowTime() != 0 || anim.getAnimFadeHideTime() != 0) {
+                //有渐隐动画
+                needFade = true;
+            }
+
+
+            final int totalStage = 1000;
+            ValueAnimator valueAnimator = ValueAnimator.ofInt(0, totalStage);
+            valueAnimator.setDuration(renderEvent.getEvent().getDuringMilliSec());
+            //设置插值器
+//            valueAnimator.setInterpolator(new DecelerateInterpolator(2));
+            final boolean finalNeedMove = needMove;
+            final boolean finalNeedFade = needFade;
+            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                int marginLeft = 0;
+                int marginTop = 0;
+                int stage = 0;
+
+                long curAnimTime;
+                long totalAnimTime;
+
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    stage = (int) animation.getAnimatedValue();
+                    curAnimTime = animation.getCurrentPlayTime();
+                    totalAnimTime = animation.getDuration();
+                    Log.d(TAG,"curAnimTime:"+curAnimTime+" totalAnimTime:"+totalAnimTime);
+
+                    if (finalNeedMove) {
+                        marginLeft = moveStartX;
+                        marginTop = moveStartY;
+                        marginLeft += (moveEndX - moveStartX) * stage / totalStage;
+                        marginTop += (moveEndY - moveStartY) * stage / totalStage;
+                        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) renderEvent.getRenderView().getLayoutParams();
+                        params.leftMargin = marginLeft;
+                        params.topMargin = marginTop;
+                        params.removeRule(RelativeLayout.CENTER_HORIZONTAL);
+                        params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+//                        Log.d(TAG,"leftMargin:"+ params.leftMargin);
+//                        Log.d(TAG,"topMargin:"+ params.topMargin);
+
+                        renderEvent.getRenderView().setLayoutParams(params);
+                        renderEvent.getRenderView().requestLayout();
+                    }
+
+                    if (finalNeedFade) {
+                        if (curAnimTime < fadeShowTime) {
+                            renderEvent.getRenderView().setAlpha(curAnimTime * 1f / fadeShowTime);
+                        } else if (totalAnimTime - curAnimTime < fadeHideTime) {
+                            float alpha = 0f;
+                            if(totalAnimTime != curAnimTime) {
+                                alpha = (totalAnimTime-curAnimTime)*1f/fadeHideTime;
+                            }
+//                            Log.d(TAG,"alpha:"+alpha);
+                            renderEvent.getRenderView().setAlpha(alpha);
+                        }
+                    }
+
+
+                }
+            });
+            valueAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                }
+
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                }
+            });
+            valueAnimator.start();
+        }
     }
 
     private int getSize(int srcBase, int tarBase, float val) {
@@ -136,7 +241,7 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
      * @param tarBaseW
      * @param tarBaseH
      * @param textEvent
-     * @return 收尾换行符, 在外部已经处理了,
+     * @return 首尾换行符, 在外部已经处理了,
      * 内部根据换行符分割成多个元素
      * 返回的list的第一个元素,还是使用之前的最后一行,剩下的每多一个新增一行
      */

@@ -1,5 +1,6 @@
 package org.crashxun.player.xunxun.subtitle.srt;
 
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -89,6 +90,7 @@ public class SrtSubtitleParser extends AbstractSubtitleParser {
                 }
             });
             onParseLoading(path, 100);
+
         } catch (Exception e) {
             e.printStackTrace();
             onParseFailer(e.getMessage());
