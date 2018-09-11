@@ -67,9 +67,9 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                     style = findStyle(assTag.getV(), dialogue.getStyle());
                     parentStyle.setFontName(style.getFontname());
                     parentStyle.setFontSize(string2Int(style.getFontsize()));
-                    parentStyle.setPrimaryColor(getColor(style.getPrimaryColour()));
-                    parentStyle.setSecondColor(getColor(style.getSecondaryColour()));
-                    parentStyle.setShadowColor(getColor(style.getBackColour()));
+                    parentStyle.setPrimaryColor(getColor(getTextStyleColor(style.getPrimaryColour())));
+                    parentStyle.setSecondColor(getColor(getTextStyleColor(style.getSecondaryColour())));
+                    parentStyle.setShadowColor(getColor(getTextStyleColor(style.getBackColour())));
                     parentStyle.setBold(isStyleOpen(style.getBold()));
                     parentStyle.setItalic(isStyleOpen(style.getItalic()));
                     parentStyle.setUnderline(isStyleOpen(style.getUnderline()));
@@ -80,7 +80,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                     //...
 
                     //边框,颜色
-                    parentStyle.setBorderColor(getColor(style.getOutlineColour()));
+                    parentStyle.setBorderColor(getColor(getTextStyleColor(style.getOutlineColour())));
                     parentStyle.setBorderStyle(string2Int(
                             style.getBorderStyle()) == 1 ?
                             AssSubtitleEvent.TextStyle.BorderStyle.ShadowBorder
@@ -155,13 +155,22 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
     }
 
 
+    /**
+     * 传入6位颜色 或8位带透明度颜色
+     * ass前2位透明度00表示不透明,ff表示透明,与android相反,需要转换
+     * @param color
+     * @return
+     */
     private String getColor(String color) {
         String ret = null;
         if (color != null && !color.equals("")) {
-            if (color.length() == 8) {
-                ret = "#FF" + color.substring(2);
-            } else if (color.length() == 10) {
-                ret = "#" + color.substring(2);
+            if (color.length() == 6) {
+                ret = "#FF"+color;
+            } else if (color.length() == 8) {
+                int alpha = Integer.parseInt(color.substring(0,2),16);
+                int androidAlpha = 255 - alpha;
+                String alphaStr = Integer.toHexString(androidAlpha);
+                ret = "#"+alphaStr+color.substring(2);
             }
         }
         return ret;
@@ -557,7 +566,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                 AssSubtitleEvent.Text textTmp = new AssSubtitleEvent.Text();
                 textTmp.setText(textIndex.text);
                 //父样式先赋值
-                textTmp.setTextStyle(event.getParentTextStyle());
+                textTmp.setTextStyle(event.getParentTextStyle().clone());
                 //有style则覆盖
                 if (tagEventTextStyle != null)
                     overrideStyle(textid++, event, textTmp, tagEventTextStyle);
@@ -565,6 +574,8 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                 ret.add(textTmp);
             }
         }
+
+        Log.d(TAG,"parseText:"+ret);
         return ret;
     }
 
@@ -759,22 +770,22 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
 //
             else if (styleStr.startsWith(OS_Color_Primary)) {
                 //\c&H<bbggrr>&
-                tagEventTextStyle.setPrimaryColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Primary, styleStr)));
+                tagEventTextStyle.setPrimaryColor(getColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Primary, styleStr))));
 
             } else if (styleStr.startsWith(OS_Color_Primary2)) {
                 // \1c&H<bbggrr>&  可能末尾没有&
-                tagEventTextStyle.setPrimaryColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Primary2, styleStr)));
+                tagEventTextStyle.setPrimaryColor(getColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Primary2, styleStr))));
             } else if (styleStr.startsWith(OS_Color_Secondary)) {
                 //\2c&H<bbggrr>&
-                tagEventTextStyle.setSecondColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Secondary, styleStr)));
+                tagEventTextStyle.setSecondColor(getColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Secondary, styleStr))));
 
             } else if (styleStr.startsWith(OS_Color_Border)) {
                 //\3c&H<bbggrr>&
-                tagEventTextStyle.setBorderColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Border, styleStr)));
+                tagEventTextStyle.setBorderColor(getColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Border, styleStr))));
 
             } else if (styleStr.startsWith(OS_Color_Shadow)) {
                 //\4c&H<bbggrr>&
-                tagEventTextStyle.setShadowColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Shadow, styleStr)));
+                tagEventTextStyle.setShadowColor(getColor(getTextStyleColor(getTextStyleTagValue(OS_Color_Shadow, styleStr))));
 
 //            }
 //            else if (styleStr.startsWith(OS_Alpha_All)) {

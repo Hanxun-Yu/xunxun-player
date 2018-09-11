@@ -23,9 +23,11 @@ import org.crashxun.player.xunxun.subtitle.ass.AssSubtitleEvent;
 public class SrtSubtitleRender2 extends AbstractSubtitleRender {
 
 
-    final int textSizeRatioScreenWidth = 50;
-    Typeface typeface;
+    private final int textSizeRatioScreenWidth = 50;
+    private Typeface typeface;
 
+    //底部垂直线性布局
+    //如果有些字幕事件重叠,则会叠起来,从底部插入此布局
     private ViewGroup textLinearParent;
 
     @Override
@@ -67,13 +69,13 @@ public class SrtSubtitleRender2 extends AbstractSubtitleRender {
     }
 
     private Animation getShowAnim() {
-        Animation animation = new AlphaAnimation(0f,0.8f);
+        Animation animation = new AlphaAnimation(0f,1.0f);
         animation.setDuration(50);
         return animation;
     }
 
     Animation getHideAnim() {
-        Animation animation = new AlphaAnimation(0.8f,0f);
+        Animation animation = new AlphaAnimation(1.0f,0f);
         animation.setDuration(100);
         return animation;
     }
@@ -81,7 +83,7 @@ public class SrtSubtitleRender2 extends AbstractSubtitleRender {
 
 
     @Override
-    protected RenderEvent getRenderEvent(SubtitleEvent event) {
+    protected RenderEvent getRenderEvent(SubtitleEvent event,ViewGroup parent) {
         if(typeface == null)
             typeface = Typeface.createFromAsset(context.getAssets(), "fonts/microyahei14m.ttf");
 

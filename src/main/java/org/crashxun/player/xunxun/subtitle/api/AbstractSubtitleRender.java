@@ -51,7 +51,7 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
                     break;
                 case MSG_SUBTITLE_EVENT_NEW:
                     SubtitleEvent event = (SubtitleEvent) msg.obj;
-                    RenderEvent renderEvent = getRenderEvent(event);
+                    RenderEvent renderEvent = getRenderEvent(event,renderParentView);
                     Log.d(TAG, "MSG_SUBTITLE_EVENT_NEW renderEvent:" + renderEvent);
 
                     //加入消息放在主线程,如果在线程中加入
@@ -92,7 +92,7 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
         private void cleanDelay(RenderEvent event) {
             msgTmp = handler.obtainMessage(MSG_SUBTITLE_EVENT_CLEAN_ONE, event);
             int processTime = (int) (System.currentTimeMillis() - event.getEvent().getPutIntoRenderTime());
-            Log.d(TAG,"processTime:"+processTime);
+//            Log.d(TAG,"processTime:"+processTime);
             handler.sendMessageDelayed(msgTmp, event.getEvent().getDuringMilliSec()-processTime-preventOverlapTime);
         }
 
@@ -204,7 +204,7 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
         TextView textView = new TextView(context);
         textView.setTextSize(30);
         textView.setTextColor(context.getResources().getColor(R.color.white_text_color));
-        textView.setShadowLayer(2f, 0, 0, Color.parseColor("#ff000000"));
+        textView.setShadowLayer(7f, 3, 3, Color.parseColor("#ff000000"));
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -235,10 +235,10 @@ public abstract class AbstractSubtitleRender implements ISubtitleRender {
     protected abstract void onRenderEventClean(RenderEvent renderEvent, ViewGroup renderParentView);
 
     //how build RenderEvent,create rendView
-    protected abstract RenderEvent getRenderEvent(SubtitleEvent event);
+    protected abstract RenderEvent getRenderEvent(SubtitleEvent event, ViewGroup renderParentView);
 
     //do something when RenderParentSizeChanged
-    protected abstract void onRenderParentSizeChanged(int w, int height, ViewGroup renderParentView);
+    protected abstract void onRenderParentSizeChanged(int w, int h, ViewGroup renderParentView);
 
 
     @Override

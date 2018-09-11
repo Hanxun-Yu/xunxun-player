@@ -157,7 +157,7 @@ public class AssSubtitleEvent extends SubtitleEvent {
 
 
 
-    public static class TextStyle {
+    public static class TextStyle implements Cloneable {
         //粗体,斜体,下划线,删除线
         private boolean isBold;
         private boolean isItalic;
@@ -326,6 +326,16 @@ public class AssSubtitleEvent extends SubtitleEvent {
                     ", borderWidth=" + borderWidth +
                     ", borderShadowWidth=" + borderShadowWidth +
                     '}';
+        }
+
+        public TextStyle clone() {
+            TextStyle o = null;
+            try {
+                o = (TextStyle) super.clone();
+            } catch (CloneNotSupportedException e) {
+                System.out.println(e.toString());
+            }
+            return o;
         }
     }
 
