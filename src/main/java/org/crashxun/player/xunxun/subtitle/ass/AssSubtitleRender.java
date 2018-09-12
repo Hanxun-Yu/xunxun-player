@@ -36,13 +36,18 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
 //
 //        }
         renderParentView.addView(renderEvent.getRenderView());
+        Log.d(TAG, "onRender id:"+subEvent.getIndex()+ " text:" + subEvent.getTexts()
+                + " srcX:" + subEvent.getPosiX()
+                + " srcY:" + subEvent.getPosiY()
+                + " tarX:" + ((RelativeLayout.LayoutParams) renderEvent.getRenderView().getLayoutParams()).leftMargin
+                + " tarY:" + ((RelativeLayout.LayoutParams) renderEvent.getRenderView().getLayoutParams()).topMargin);
 
 
         AssSubtitleEvent.Anim anim = subEvent.getParentAnim();
 
         //判断动画
         if (anim != null) {
-            Log.d(TAG,"anim:"+anim);
+            Log.d(TAG, "anim:" + anim);
             int parentW = renderParentView.getLayoutParams().width;
             int parentH = renderParentView.getLayoutParams().height;
 
@@ -52,14 +57,16 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
             boolean needMove = false;
             boolean needFade = false;
 
-            final int moveStartX = getSize(srcBaseW, parentW, anim.getAnimMoveStartX());
-            final int moveStartY = getSize(srcBaseH, parentH, anim.getAnimMoveStartY());
-            final int moveEndX = getSize(srcBaseW, parentW, anim.getAnimMoveEndX());
-            final int moveEndY = getSize(srcBaseH, parentH, anim.getAnimMoveEndY());
+            Log.e(TAG,"half:"+renderEvent.getRenderView().getMeasuredWidth() / 2);
+            final int moveStartX = getSize(srcBaseW, parentW, anim.getAnimMoveStartX()) - renderEvent.getRenderView().getMeasuredWidth() / 2;
+            final int moveStartY = getSize(srcBaseH, parentH, anim.getAnimMoveStartY()) - renderEvent.getRenderView().getMeasuredHeight() / 2;
+            final int moveEndX = getSize(srcBaseW, parentW, anim.getAnimMoveEndX()) - renderEvent.getRenderView().getMeasuredWidth() / 2;
+            final int moveEndY = getSize(srcBaseH, parentH, anim.getAnimMoveEndY()) - renderEvent.getRenderView().getMeasuredHeight() / 2;
             if (anim.getAnimMoveStartX() != 0) {
                 //有移动动画
                 needMove = true;
-
+                Log.e(TAG, "srcSX=" + anim.getAnimMoveStartX() + " srcSY=" + anim.getAnimMoveStartY() + " srcEX=" + anim.getAnimMoveEndX() + " srcEY=" + anim.getAnimMoveEndY());
+                Log.e(TAG, "tarSX=" + moveStartX + " tarSY=" + moveStartY + " tarEX=" + moveEndX + " tarEY=" + moveEndY);
             }
 
             final int fadeShowTime = anim.getAnimFadeShowTime();
@@ -90,7 +97,7 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
                     stage = (int) animation.getAnimatedValue();
                     curAnimTime = animation.getCurrentPlayTime();
                     totalAnimTime = animation.getDuration();
-                    Log.d(TAG,"curAnimTime:"+curAnimTime+" totalAnimTime:"+totalAnimTime);
+//                    Log.d(TAG,"curAnimTime:"+curAnimTime+" totalAnimTime:"+totalAnimTime);
 
                     if (finalNeedMove) {
                         marginLeft = moveStartX;
@@ -114,8 +121,8 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
                             renderEvent.getRenderView().setAlpha(curAnimTime * 1f / fadeShowTime);
                         } else if (totalAnimTime - curAnimTime < fadeHideTime) {
                             float alpha = 0f;
-                            if(totalAnimTime != curAnimTime) {
-                                alpha = (totalAnimTime-curAnimTime)*1f/fadeHideTime;
+                            if (totalAnimTime != curAnimTime) {
+                                alpha = (totalAnimTime - curAnimTime) * 1f / fadeHideTime;
                             }
 //                            Log.d(TAG,"alpha:"+alpha);
                             renderEvent.getRenderView().setAlpha(alpha);
@@ -129,6 +136,9 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
+                    Log.d(TAG, "onAnimationEnd text:" + subEvent.getIndex()
+                            + " x:" + ((RelativeLayout.LayoutParams) renderEvent.getRenderView().getLayoutParams()).leftMargin
+                            + " y:" + ((RelativeLayout.LayoutParams) renderEvent.getRenderView().getLayoutParams()).topMargin);
                 }
 
                 @Override
@@ -143,7 +153,7 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
     private int getSize(int srcBase, int tarBase, float val) {
         int ret = 0;
         ret = (int) (val * tarBase / srcBase);
-        Log.d(TAG, "srcBase:" + srcBase + " tarBase:" + tarBase + " val:" + val + " ret:" + ret);
+//        Log.d(TAG, "srcBase:" + srcBase + " tarBase:" + tarBase + " val:" + val + " ret:" + ret);
         return ret;
     }
 
@@ -204,12 +214,11 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
 
 //                linearLayout.addView();
         }
-
+        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        verticalLinear.measure(widthMeasureSpec, heightMeasureSpec);
         if (subEvent.getPosiX() != 0 || subEvent.getPosiY() != 0) {
-            int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            verticalLinear.measure(widthMeasureSpec, heightMeasureSpec);
-            Log.e(TAG, "linearLayout.getMeasuredWidth():" + verticalLinear.getMeasuredWidth());
+//            Log.e(TAG, "linearLayout.getMeasuredWidth():" + verticalLinear.getMeasuredWidth());
 
             params.leftMargin = getSize(srcBaseW, parentW, subEvent.getPosiX()) - verticalLinear.getMeasuredWidth() / 2;
             params.topMargin = getSize(srcBaseH, parentH, subEvent.getPosiY()) - verticalLinear.getMeasuredHeight() / 2;
@@ -219,7 +228,10 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
             params.bottomMargin = 50;
         }
         verticalLinear.setLayoutParams(params);
-        Log.e(TAG, "left:" + params.leftMargin + " top:" + params.topMargin + " bottom:" + params.bottomMargin);
+        if(subEvent.getTexts().get(0).getTextStyle().getAngle() != 0) {
+            verticalLinear.setRotation(-subEvent.getTexts().get(0).getTextStyle().getAngle());
+        }
+//        Log.e(TAG, "left:" + params.leftMargin + " top:" + params.topMargin + " bottom:" + params.bottomMargin);
 
         return new RenderEvent(subEvent, verticalLinear);
     }
@@ -271,15 +283,15 @@ public class AssSubtitleRender extends AbstractSubtitleRender {
             ret.setShadowLayer(7, 3, 3, Color.parseColor(textEvent.getTextStyle().getShadowColor()));
 
             //角度
-            ret.setAngle(textEvent.getTextStyle().getAngle());
+//            ret.setAngle();
 
             ret.setText(item);
 
             ret.setTextSize(TypedValue.COMPLEX_UNIT_PX, getSize(srcBaseH, tarBaseH, textEvent.getTextStyle().getFontSize()));
 
-            Log.d(TAG, "size:" + ret.getTextSize()
-                    + " color:" + ret.getCurrentTextColor() + " " + textEvent.getTextStyle().getPrimaryColor()
-                    + " text:" + ret.getText());
+//            Log.d(TAG, "size:" + ret.getTextSize()
+//                    + " color:" + ret.getCurrentTextColor() + " " + textEvent.getTextStyle().getPrimaryColor()
+//                    + " text:" + ret.getText());
             //边框,先不处理,搞不清是一行一个边框,还是一串文字一个边框
 //        ret.setBorderColor(Color.parseColor("#"+textEvent.getTextStyle().getBorderColor()));
 

@@ -96,7 +96,7 @@ public class TestSubtitleVideoActivity extends FragmentActivity implements Track
         btn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSubtitleController.switchSubtitle("/sdcard/Game.of.Thrones.S01E10.ass");
+                mSubtitleController.switchSubtitle("/sdcard/Game.Of.Thrones.S01.E05.ass");
             }
         });
         // handle arguments

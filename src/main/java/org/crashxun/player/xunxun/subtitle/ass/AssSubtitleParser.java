@@ -684,7 +684,7 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
 //        while(matcher.find()) {
 //
 //        }
-        //先把\t干掉
+        //先把\t干掉 eg.\t(\frx1)(\frz-1)
         while (textStyle.contains(OS_Anim_DynamicOS)) {
             int start = textStyle.indexOf(OS_Anim_DynamicOS);
             int foundLeftBracket = 0;
@@ -695,16 +695,32 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
                     foundLeftBracket++;
                 if (textStyle.charAt(i) == ')')
                     foundRightBracket++;
-                if (foundLeftBracket != 0 && foundLeftBracket == foundRightBracket) {
+
+                if(i != start && textStyle.charAt(i) == '\\' && foundLeftBracket == foundRightBracket) {
                     end = i;
                     break;
                 }
+
+//                if (foundLeftBracket != 0 && foundLeftBracket == foundRightBracket) {
+//                    end = i;
+//                    break;
+//                }
             }
-            textStyle = textStyle.substring(0, start) + textStyle.substring(end + 1);
+            if(end == 0) {
+                textStyle = textStyle.substring(0, start);
+            } else {
+                textStyle = textStyle.substring(0, start) + textStyle.substring(end);
+            }
+            Log.d(TAG,"textStyle:"+textStyle+" start:"+start+" end:"+end);
         }
 
         if (textStyle.trim().length() == 0) {
             return;
+        }
+
+        //如果首尾成对出现() eg.{(\frx0\frz-7)}, 再次感叹ass这种坑爹规范, 服了
+        if(textStyle.startsWith("(")&& textStyle.endsWith(")")) {
+            textStyle = textStyle.substring(1,textStyle.length()-1);
         }
 
         //反斜杠分割
@@ -737,8 +753,17 @@ public class AssSubtitleParser extends AbstractSubtitleParser implements AssSubt
             } else if (styleStr.startsWith(OS_FontScale)) {
                 //\fsc<x/y><percent>
 
+            } else if (styleStr.startsWith(OS_AngleX)) {
+
+            } else if (styleStr.startsWith(OS_AngleY)) {
+
+            } else if (styleStr.startsWith(OS_AngleZ)) {
+                tagEventTextStyle.setAngle(string2Float(getTextStyleTagValue(OS_AngleZ, styleStr)));
+            } else if (styleStr.startsWith(OS_Angle)) {
+                //与OS_AngleZ一致
+                tagEventTextStyle.setAngle(string2Float(getTextStyleTagValue(OS_Angle, styleStr)));
             }
-//            else if (styleStr.startsWith(OS_ShadowDepth)) {
+            //            else if (styleStr.startsWith(OS_ShadowDepth)) {
 //                \shad[<x,y>]<depth> 阴影深度
 //            }
             else if (styleStr.startsWith(OS_FontName)) {

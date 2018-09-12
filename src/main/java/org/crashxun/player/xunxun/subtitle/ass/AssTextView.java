@@ -49,7 +49,7 @@ public class AssTextView extends android.support.v7.widget.AppCompatTextView {
         if(angle != 0) {
             canvas.save();
             canvas.translate(getCompoundPaddingLeft(), getExtendedPaddingTop());
-            canvas.rotate(angle, this.getWidth() / 2f, this.getHeight() / 2f);
+            canvas.rotate(-angle, this.getWidth() / 2f, this.getHeight() / 2f);
         }
 
         super.onDraw(canvas);

@@ -84,13 +84,13 @@ public class SrtSubtitleRender2 extends AbstractSubtitleRender {
 
     @Override
     protected RenderEvent getRenderEvent(SubtitleEvent event,ViewGroup parent) {
-        if(typeface == null)
-            typeface = Typeface.createFromAsset(context.getAssets(), "fonts/microyahei14m.ttf");
+//        if(typeface == null)
+//            typeface = Typeface.createFromAsset(context.getAssets(), "fonts/microyahei14m.ttf");
 
         TextView textView = new TextView(context);
         textView.setTextColor(context.getResources().getColor(R.color.white_text_color));
         textView.setShadowLayer(7f, 3, 3, Color.parseColor("#ff000000"));
-        textView.setTypeface(typeface);
+//        textView.setTypeface(typeface);
         textView.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
