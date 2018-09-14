@@ -634,7 +634,7 @@ public class XunVideoView2 extends FrameLayout implements MediaController.MediaP
     private IMediaPlayer.OnTimedTextListener mOnTimedTextListener = new IMediaPlayer.OnTimedTextListener() {
         @Override
         public void onTimedText(IMediaPlayer mp, IjkTimedText text) {
-            Log.d(TAG, "onTimedText text:" + text);
+            Log.d(TAG, "onTimedText text:" + text.getText());
             if (text != null) {
                 subtitleDisplay.setText(text.getText());
             }
