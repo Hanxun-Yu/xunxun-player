@@ -76,7 +76,7 @@ public class TestSubtitleVideoActivity extends FragmentActivity implements Track
     MenuParams mMenuParams;
 
 
-    Button btn1, btn2;
+    Button btn1, btn2,internalBtn1,internalBtn2,internalBtnOff;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +85,9 @@ public class TestSubtitleVideoActivity extends FragmentActivity implements Track
         keepScreenLongLight(this,true);
         btn1 = findViewById(R.id.btn1);
         btn2 = findViewById(R.id.btn2);
+        internalBtn1 = findViewById(R.id.internal_btn1);
+        internalBtn2 = findViewById(R.id.internal_btn2);
+        internalBtnOff = findViewById(R.id.internal_btn_off);
 
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,13 +102,37 @@ public class TestSubtitleVideoActivity extends FragmentActivity implements Track
                 mSubtitleController.switchSubtitle("/sdcard/Game.Of.Thrones.S01.E05.ass");
             }
         });
+
+        internalBtn1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectTrack(2);
+            }
+        });
+
+        internalBtn2.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                selectTrack(3);
+            }
+        });
+        internalBtnOff.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                deselectTrack(getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT));
+            }
+        });
         // handle arguments
         mVideoPath = getIntent().getStringExtra("videoPath");
         Log.d(TAG, "videoPath:" + mVideoPath);
         mVideoName = getIntent().getStringExtra("videoName");
         Log.d(TAG, "mVideoName:" + mVideoName);
 
-        mVideoPath = Uri.fromFile(new File("/sdcard/123.mkv")).toString();
+//        mVideoPath = Uri.fromFile(new File("/sdcard/123.mkv")).toString();
+        mVideoPath = Uri.fromFile(new File("/sdcard/123_utf8ass _srt.mkv")).toString();
+
 //        mVideoPath = "http://video.venjean.cn/sv/589e162b-1601585d5d7/589e162b-1601585d5d7.mp4";
 //        mVideoPath = "http://192.168.199.205/vod/movie/No.Escape.2015.1080p.BluRay.x264-DRONES[rarbg]/No.Escape.2015.1080p.BluRay.x264-DRONES.mkv";
 //        mVideoPath = "http://10.1.1.201/Blade.Runner.2049.2017.BD1080P.X264.DTS-HD.MA.7.1.Mandarin&English.CHS-ENG.Mp4BaFans.mkv";
