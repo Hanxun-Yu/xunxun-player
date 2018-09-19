@@ -1,0 +1,71 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".activities.VideoActivity">
+
+    <!-- The main content view -->
+
+    <org.crashxun.player.xunxun.XunVideoView2
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
+    </org.crashxun.player.xunxun.XunVideoView2>
+
+    <TextView
+        android:id="@+id/toast_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:background="@color/ijk_transparent_dark"
+        android:padding="16dp"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/right_drawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/internal_btn_off"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="内嵌off" />
+        <Button
+            android:id="@+id/internal_btn1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="内嵌1" />
+        <Button
+            android:id="@+id/internal_btn2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="内嵌2" />
+
+
+        <Button
+            android:id="@+id/btn1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="字幕1" />
+
+        <Button
+            android:id="@+id/btn2"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="字幕2" />
+    </LinearLayout>
+</RelativeLayout>

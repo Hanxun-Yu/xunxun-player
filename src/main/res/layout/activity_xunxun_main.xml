@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2d2b2b"
+    xmlns:oak="http://schemas.android.com/apk/res-auto"
+    android:focusable="true">
+
+
+
+    <ImageView
+        android:id="@+id/bg_img"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10px"
+        android:layout_marginRight="10px"
+        android:layout_marginTop="10px"
+        android:layout_marginBottom="10px"
+        android:background="@drawable/main_bg"
+        />
+
+    <FrameLayout
+        android:id="@+id/brower"
+        android:layout_width="900px"
+        android:layout_height="900px"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="100px"
+        android:layout_centerVertical="true"
+        />
+
+
+    <org.crashxun.player.xunxun.svg.AnimatedSvgView
+        android:id="@+id/animated_svg_view"
+        android:layout_width="1104px"
+        android:layout_height="200px"
+        android:layout_centerVertical="true"
+        android:layout_centerInParent="true"
+        oak:oakSvgFillStart="2000"
+        oak:oakSvgFillTime="3000"
+        oak:oakSvgImageSizeX="1104"
+        oak:oakSvgImageSizeY="200"
+        oak:oakSvgTraceTime="2000"
+        oak:oakSvgTraceTimePerGlyph="2000" />
+
+</RelativeLayout>

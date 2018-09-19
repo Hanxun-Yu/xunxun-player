@@ -1,0 +1,97 @@
+[
+  {
+    "menuID": "0",
+    "menuName": "菜单",
+    "items": [
+      {
+        "itemID":"subtitle",
+        "itemName": "字幕设置",
+        "itemType": "menu",
+        "itemParams": ["subtitleSub"],
+        "itemIcon":""
+      },
+      {
+        "itemID":"audio",
+        "itemName": "音轨选择",
+        "itemType": "menu",
+        "itemParams": ["audioSub"],
+        "itemIcon":""
+      },
+      {
+        "itemID":"ratio",
+        "itemName": "画面比例",
+        "itemType": "menu",
+        "itemParams": ["ratioSub"],
+        "itemIcon":""
+      },
+      {
+        "itemID":"info",
+        "itemName": "影片信息",
+        "itemType": "activity",
+        "itemParams": ["org.crashxun.player.action_mediainfo"],
+        "itemIcon":""
+      }
+    ]
+  },
+  {
+    "menuID": "subtitleSub",
+    "menuName": "字幕设置",
+    "superMenuID":"0",
+    "items": [
+      {
+        "itemID":"no_subtitle",
+        "itemName": "无字幕",
+        "itemType": "radiobutton",
+        "itemParams": ["org.crashxun.player.action_subtitle_changed","true","0"], //params:action, selected, radiobtnID
+        "itemParamsKV":[{"org.crashxun.player.key_subtitle_id":"off"}]
+      },
+      {
+        "itemID":"autodown_subtitle",
+        "itemName": "自动下载字幕",
+        "itemType": "checkbox",
+        "itemParams": ["org.crashxun.player.action_subtitle_auto_download","true","1"],//itemParams[1] 为true,则发送itemParamsKV[0] ,否则发送[]
+        "itemParamsKV":[{"org.crashxun.player.key_subtitle":"on"},{"org.crashxun.player.key_subtitle":"off"}]
+
+      },
+      {
+        "itemID":"subtitle_load",
+        "itemName": "手动加载字幕",
+        "itemType": "activity",
+        "itemParams": ["org.crashxun.player.action_subtitle_load"]
+      },
+      {
+        "itemID":"subtitle_adjust",
+        "itemName": "校准时间轴",
+        "itemType": "activity",
+        "itemParams": ["org.crashxun.player.action_subtitle_time_adjust"]
+      }
+    ]
+  },
+  {
+    "menuID": "audioSub",
+    "menuName": "音轨选择",
+    "superMenuID":"0"
+  },
+  {
+    "menuID": "ratioSub",
+    "menuName": "画面比例",
+    "superMenuID":"0",
+    "items":[
+      {
+        "itemID":"adapt",
+        "itemName": "自适应",
+        "itemType": "radiobutton",
+        "itemParams": ["org.crashxun.player.action_ratio_changed","true","0"],
+        "itemParamsKV":[{"org.crashxun.player.key_ratio":"adapt"}]
+      },
+      {
+        "itemID":"stretch",
+        "itemName": "全屏拉伸",
+        "itemType": "radiobutton",
+        "itemParams": ["org.crashxun.player.action_ratio_changed","false","0"],
+        "itemParamsKV":[{"org.crashxun.player.key_ratio":"stretch"}]
+
+      }
+    ]
+  }
+]

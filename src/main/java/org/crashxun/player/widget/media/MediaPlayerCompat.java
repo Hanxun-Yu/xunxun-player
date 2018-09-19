@@ -69,6 +69,7 @@ public class MediaPlayerCompat {
         IjkMediaPlayer ijkMediaPlayer = getIjkMediaPlayer(mp);
         if (ijkMediaPlayer == null)
             return -1;
+        ijkMediaPlayer.getTrackInfo();
         return ijkMediaPlayer.getSelectedTrack(trackType);
     }
 }

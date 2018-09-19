@@ -6,7 +6,6 @@
 
     <style name="Theme.App.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
-
         <item name="actionButtonStyle">@style/Widget.App.ActionButton</item>
     </style>
 
@@ -15,5 +14,84 @@
         <item name="android:windowBackground">@null</item>
 
         <item name="actionButtonStyle">@style/Widget.App.ActionButton</item>
+    </style>
+
+
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+
+    <!--mce_bogus="1"-->
+    <!--<style name="LeftMenuAnim"  parent="android:Animation">-->
+        <!--<item name="android:windowEnterAnimation">@aleft_menu_comeinu_in</item>-->
+        <!--<item name="android:windowExitAnimation">@aleft_menu_dismiss_out</item>-->
+    <!--</style>-->
+
+    <style name="login" parent="LeftMenu" >
+
+    </style>
+
+
+    <style name="loginAnim" parent="@android:style/Animation.Activity" >
+        <item name="android:activityOpenEnterAnimation">@anim/keyboard_comein</item>
+        <item name="android:activityOpenExitAnimation">@anim/keyboard_comeout</item>
+        <item name="android:activityCloseEnterAnimation">@anim/keyboard_comein</item>
+        <item name="android:activityCloseExitAnimation">@anim/keyboard_comeout</item>
+    </style>
+
+
+    <style name="LeftMenu" parent="android:Theme.Holo.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+        <item name="android:taskOpenEnterAnimation">@null</item>
+        <item name="android:taskOpenExitAnimation">@null</item>
+        <item name="android:taskCloseEnterAnimation">@null</item>
+        <item name="android:taskCloseExitAnimation">@null</item>
+        <item name="android:taskToFrontEnterAnimation">@null</item>
+        <item name="android:taskToFrontExitAnimation">@null</item>
+        <item name="android:taskToBackEnterAnimation">@null</item>
+        <item name="android:taskToBackExitAnimation">@null</item>
+        <!--<item name="android:windowAnimationStyle">@style/LeftMenuAnim</item>-->
+        <item name="android:windowAnimationStyle">@null</item>
+
+    </style>
+
+    <style name="LeftMenuAnim" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/act_left_menu_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/act_left_menu_out</item>
+    </style>
+
+    <style name="noAnimation" parent="android:Theme.Holo.NoActionBar.Fullscreen">
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+        <item name="android:taskOpenEnterAnimation">@null</item>
+        <item name="android:taskOpenExitAnimation">@null</item>
+        <item name="android:taskCloseEnterAnimation">@null</item>
+        <item name="android:taskCloseExitAnimation">@null</item>
+        <item name="android:taskToFrontEnterAnimation">@null</item>
+        <item name="android:taskToFrontExitAnimation">@null</item>
+        <item name="android:taskToBackEnterAnimation">@null</item>
+        <item name="android:taskToBackExitAnimation">@null</item>
+    </style>
+    
+    <style name="white_shadow_text">
+        <item name="android:textColor">@color/white_text_color</item>
+        <item name="android:shadowColor">#ff000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
+        <item name="android:textSize">@dimen/menu_textsize</item>
+
     </style>
 </resources>

@@ -13,13 +13,13 @@
         android:layout_height="match_parent"
         android:background="#ff000000">
 
-        <org.crashxun.player.widget.media.XunVideoView
+        <org.crashxun.player.xunxun.XunVideoView
             android:id="@+id/video_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center">
 
-        </org.crashxun.player.widget.media.XunVideoView>
+        </org.crashxun.player.xunxun.XunVideoView>
 
         <TextView
             android:id="@+id/toast_text_view"
@@ -53,8 +53,8 @@
 
     <!-- The navigation drawer -->
     <FrameLayout android:id="@+id/right_drawer"
-        android:layout_width="240dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="right"
+        android:layout_gravity="left"
         android:background="@color/ijk_transparent_dark" />
 </android.support.v4.widget.DrawerLayout>
